@@ -79,7 +79,7 @@ const MetodoPago = () => {
                 fecha: fechaSeleccionada,
                 hora_inicio: bloqueSeleccionado.hora_inicio,
                 hora_fin: bloqueSeleccionado.hora_fin,
-                comentario_cliente: reservaInvitado?.comentario || null,
+                comentario_cliente: reservaInvitado?.comentario_cliente || null,
             });
     
             await new Promise((resolve) => setTimeout(resolve, 2000)); // Esperar 2 segundos
@@ -116,7 +116,7 @@ const MetodoPago = () => {
                         <h4 className='titulo-1-1-2'>Datos del Cliente</h4>
                         <p><b>Nombre:</b> {reservaInvitado.nombre}</p>
                         <p><b>Correo Electrónico:</b> {reservaInvitado.email}</p>
-                        <p><b>Comentario:</b> {reservaInvitado.comentario || 'Sin comentario'}</p>
+                        <p><b>Comentario:</b> {reservaInvitado.comentario_cliente || 'Sin comentario'}</p>
                         <p><b>Teléfono:</b> {reservaInvitado.telefono || 'Sin teléfono'}</p>
                         <div className="modal-buttons">
                             <button onClick={() => setIsModalOpen(false)} className="btn volver">Volver</button>
@@ -282,7 +282,7 @@ const MetodoPago = () => {
                     <hr />
                     <p><b>Nombre:</b> {reservaInvitado.nombre}</p>
                     <p><b>Correo Electrónico:</b> {reservaInvitado.email}</p>
-                    <p><b>Comentario:</b> {reservaInvitado.comentario || 'Sin comentario'}</p>
+                    <p><b>Comentario:</b> {reservaInvitado.comentario_cliente|| 'Sin comentario'}</p>
                     <p><b>Teléfono:</b> {reservaInvitado.telefono || 'Sin teléfono'}</p>
                 </div>
             </div>

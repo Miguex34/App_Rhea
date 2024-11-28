@@ -33,6 +33,8 @@ import CuentaClient from './components/CuentaClient';
 // Función PrivateRoute para proteger rutas privadas
 import Principal from './components/Principal';
 import Dashboard from './components/Dashboard';
+import CancelarReserva from './components/CancelarReserva';
+
 const AppContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
   const [userCargo, setUserCargo] = useState(localStorage.getItem('cargo') || '');
@@ -147,6 +149,7 @@ const AppContent = () => {
           <Route path="/paso-registro-reserva" element={<PasoRegistroReserva />} />
           <Route path="/metodo-pago" element={<MetodoPago />} />
           <Route path="/confirmacion" element={<ConfirmacionReserva />} />
+          <Route path="/cancelar-reserva/:token" element={<CancelarReserva />} />
 
           <Route path="/negocio/:nombre" element={<VistaCliente />} />
           <Route path="/cuenta-cliente" element={<CuentaClient />} />

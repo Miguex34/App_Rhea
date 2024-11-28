@@ -67,6 +67,7 @@ app.use('/api/reserva-horario', reservaHorarioRoutes);
 // Rutas para el panel de reservas
 app.use('/api/panel-reservas', panelReservasRoutes);
 
+
 // Servir archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/soportes', soporteRoutes);

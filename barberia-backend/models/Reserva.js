@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const moment = require('moment-timezone');
 const Usuario = require('./Usuario');
 const Negocio = require('./Negocio');
 const EmpleadoNegocio = require('./EmpleadoNegocio');
@@ -47,7 +48,12 @@ const Reserva = sequelize.define('Reserva', {
   },
   fecha_creacion: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
+    defaultValue: () => moment().tz('America/Santiago').toDate(),
+  },
+  cancelacion_token: { // Nuevo campo para el token
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true, // Garantiza que sea único
   },
 }, {
   timestamps: false,

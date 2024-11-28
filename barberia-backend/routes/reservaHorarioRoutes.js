@@ -21,4 +21,7 @@ router.get('/disponibilidad/empleado/:negocioId/:servicioId/:empleadoId', reserv
 // Ruta para crear una nueva reserva
 router.post('/crear', reservaHorarioController.crearReserva);
 
+// Ruta para cancelar una reserva
+router.post('/cancelar', reservaHorarioController.cancelarReserva);
+
 module.exports = router;

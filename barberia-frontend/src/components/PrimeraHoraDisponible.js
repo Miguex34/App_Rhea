@@ -24,6 +24,7 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
     const [error, setError] = useState(null);
     const [negocioNombre, setNegocioNombre] = useState('');
     const [servicioNombre, setServicioNombre] = useState('');
+    const [sinDisponibilidad, setSinDisponibilidad] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -46,6 +47,9 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
                 setDiasDisponibles(diasDisponibles);
                 setNegocioNombre(negocio.nombre);
                 setServicioNombre(servicio.nombre);
+                // Verifica si todos los días están no disponibles
+                const hayDiasDisponibles = diasDisponibles.some((dia) => dia.disponible);
+                setSinDisponibilidad(!hayDiasDisponibles); // Si no hay días disponibles, cambia el estado a true
                 setLoading(false);
             })
             .catch((error) => {
@@ -124,6 +128,10 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
                 <p>Cargando disponibilidad...</p>
             ) : error ? (
                 <p style={{ color: 'red' }}>{error}</p>
+            ) : sinDisponibilidad ? ( // Si no hay disponibilidad, muestra el mensaje
+                <p style={{ fontSize: '18px', color: 'red' }}>
+                    No Existen Profesionales Disponibles para este Servicio. Intenta con otro servicio...
+                </p>
             ) : (
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '30px' }}>
                     <Calendar onChange={handleDiaSeleccion} tileDisabled={({ date }) => isDayDisabled(date)} />

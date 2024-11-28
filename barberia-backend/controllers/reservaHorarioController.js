@@ -8,14 +8,14 @@ const EmpleadoNegocio = require('../models/EmpleadoNegocio');
 const EmpleadoServicio = require('../models/EmpleadoServicio');
 const Usuario = require('../models/Usuario');
 const Cliente = require('../models/Cliente');
-const moment = require('moment');
+const moment = require('moment-timezone');
 require('moment/locale/es'); // Cargar configuración en español para moment
 moment.locale('es'); // Configurar moment para usar el español
 const normalizeString = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 const { Op } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const { sendEmailWithTemplateData }  = require('../utils/sendEmail');
-
+const crypto = require('crypto');
 
 // Funcion para obtener la disponibilidad de TODOS los empleados.
 exports.obtenerDisponibilidadGeneral = async (req, res) => {
@@ -72,13 +72,31 @@ exports.obtenerDisponibilidadGeneral = async (req, res) => {
             const bloquesPorEmpleado = [];
 
             for (const empleado of empleadosDisponibles) {
+                // Verificar si el empleado está relacionado con el servicio proporcionado
+                const empleadoServicio = await EmpleadoServicio.findOne({
+                    where: {
+                        id_empleado: empleado.id_usuario, // Relacionamos con el empleado
+                        id_servicio: servicioId,         // Validamos el servicio especificado
+                    },
+                });
+            
+                if (!empleadoServicio) {
+                    // Saltar al siguiente empleado si no realiza el servicio
+                    continue;
+                }
+            
                 const bloquesEmpleado = [];
-
                 let horaInicio = moment(`${fecha.format('YYYY-MM-DD')} ${empleado.hora_inicio}`);
                 const horaFin = moment(`${fecha.format('YYYY-MM-DD')} ${empleado.hora_fin}`);
-
+            
                 while (horaInicio.clone().add(duracionServicio, 'minutes').isSameOrBefore(horaFin)) {
                     const horaFinBloque = horaInicio.clone().add(duracionServicio, 'minutes');
+                    
+                    // Verificar si la hora actual ya pasó en el día actual
+                    if (fecha.isSame(moment(), 'day') && horaInicio.isBefore(moment())) {
+                        horaInicio = horaFinBloque;
+                        continue;
+                    }
 
                     // Verificar si ya existe una reserva en este bloque
                     const reservaExistente = await Reserva.findOne({
@@ -90,17 +108,17 @@ exports.obtenerDisponibilidadGeneral = async (req, res) => {
                             hora_fin: horaFinBloque.format('HH:mm:ss')
                         }
                     });
-
+            
                     if (!reservaExistente) {
                         bloquesEmpleado.push({
                             hora_inicio: horaInicio.format('HH:mm'),
                             hora_fin: horaFinBloque.format('HH:mm'),
                         });
                     }
-
+            
                     horaInicio = horaFinBloque;
                 }
-
+            
                 // Solo incluimos empleados que tienen bloques disponibles
                 if (bloquesEmpleado.length > 0) {
                     bloquesPorEmpleado.push({
@@ -199,6 +217,12 @@ exports.obtenerDisponibilidadEmpleado = async (req, res) => {
                 while (horaInicio.clone().add(duracionServicio, 'minutes').isSameOrBefore(horaFin)) {
                     const horaFinBloque = horaInicio.clone().add(duracionServicio, 'minutes');
 
+                    // Verificar si la hora actual ya pasó en el día actual
+                    if (fecha.isSame(moment(), 'day') && horaInicio.isBefore(moment())) {
+                        horaInicio = horaFinBloque;
+                        continue;
+                    }
+                    
                     const reservaExistente = await Reserva.findOne({
                         where: {
                             id_negocio: negocioId,
@@ -479,6 +503,7 @@ exports.crearReserva = async (req, res) => {
         // Buscar el id_usuario correspondiente al id_empleado
         const empleadoNegocio = await EmpleadoNegocio.findOne({
             where: { id: empleadoId, id_negocio: negocioId },
+            include: [{ model: Usuario, attributes: ['nombre'] }], // Incluye el modelo Usuario
         });
 
         if (!empleadoNegocio) {
@@ -488,7 +513,7 @@ exports.crearReserva = async (req, res) => {
         }
 
         const id_usuario = empleadoNegocio.id_usuario; // Extraer el id_usuario
-        const nombre_profesional = empleadoNegocio.Usuario?.nombre_usuario || 'Profesional no especificado';
+        const nombre_profesional = empleadoNegocio?.Usuario?.nombre || 'Profesional no especificado';
         
         // Buscar información del negocio
         const negocio = await Negocio.findByPk(negocioId, {
@@ -512,6 +537,9 @@ exports.crearReserva = async (req, res) => {
             });
         }
 
+        // Generar un token único para la cancelación
+        const cancelacionToken = crypto.randomBytes(32).toString('hex');
+
         // Crear la reserva
         const nuevaReserva = await Reserva.create({
             id_cliente: clienteId,
@@ -525,6 +553,7 @@ exports.crearReserva = async (req, res) => {
             comentario_cliente,
             estado: 'reservado',
             fecha_creacion: new Date(),
+            cancelacion_token: cancelacionToken,
         });
 
         // envio de  correo 
@@ -536,18 +565,7 @@ exports.crearReserva = async (req, res) => {
             console.error('El cliente no tiene un correo válido:', cliente);
         } else {
             // Enviar correo al cliente
-            try {
-                console.log('Enviando correo con los datos:', {
-                    to: cliente.email_cliente,
-                    nombre_usuario: cliente.nombre,
-                    numero_reserva: nuevaReserva.id,
-                    negocio: negocio.nombre, 
-                    servicio: servicio.nombre, 
-                    profesional: nombre_profesional, 
-                    fecha,
-                    hora_inicio,
-                    hora_fin,
-                });
+            try { 
 
                 await sendEmailWithTemplateData(cliente.email_cliente, 'd-d6cf6663ca1441468c43fc510b22cb33', {
                     nombre_usuario: cliente.nombre,
@@ -558,6 +576,7 @@ exports.crearReserva = async (req, res) => {
                     fecha, // Fecha de la reserva
                     hora_inicio, // Hora de inicio
                     hora_fin, // Hora de fin
+                    enlace_cancelacion: `http://localhost:3000/cancelar-reserva/${cancelacionToken}`
                 });
             } catch (error) {
                 console.error('Error al enviar el correo:', error.message);
@@ -569,5 +588,31 @@ exports.crearReserva = async (req, res) => {
     } catch (error) {
         console.error('Error al crear la reserva:', error);
         res.status(500).json({ message: 'Error interno al crear la reserva.', error: error.message });
+    }
+};
+
+
+exports.cancelarReserva = async (req, res) => {
+    const { token } = req.body; // Extraer el token desde el cuerpo de la solicitud
+    console.log('Token recibido:', token); // <-- Log del token recibido
+    try {
+        const reserva = await Reserva.findOne({ where: { cancelacion_token: token } });
+
+        if (!reserva) {
+            return res.status(404).json({ message: 'Reserva no encontrada o token inválido.' });
+        }
+
+        if (reserva.estado === 'Cancelada') {
+            return res.status(400).json({ message: 'La reserva ya fue cancelada.' });
+        }
+
+        reserva.estado = 'Cancelada';
+        await reserva.save();
+        console.log('Reserva cancelada exitosamente:', reserva.id);
+
+        res.status(200).json({ message: 'Reserva cancelada exitosamente.' });
+    } catch (error) {
+        console.error('Error al cancelar la reserva:', error);
+        res.status(500).json({ message: 'Error interno al cancelar la reserva.' });
     }
 };

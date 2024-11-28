@@ -65,17 +65,30 @@ const ProfesionalEspecifico = ({ negocioId, servicioId }) => {
     };
 
     const handleBloqueSeleccionado = (bloque) => {
-        const fecha = diasDisponibles.find((d) =>
-            d.bloques?.some((b) => b.hora_inicio === bloque.hora_inicio && b.hora_fin === bloque.hora_fin)
-        )?.fecha;
-
-        if (!fecha) {
-            console.warn('No se encontró una fecha para el bloque seleccionado:', bloque);
+        if (!empleadoSeleccionado || !empleadoSeleccionado.id) {
+            console.warn('No se encontró un empleado seleccionado válido.');
             return;
         }
-
-        setBloqueSeleccionado({ ...bloque, fecha });
-        sessionStorage.setItem('bloqueSeleccionado', JSON.stringify({ ...bloque, fecha }));
+    
+        // Asegúrate de que la fecha sea la seleccionada explícitamente en el calendario
+        const fecha = diasDisponibles.find((d) => 
+            d.fecha === sessionStorage.getItem('fechaSeleccionada')
+        )?.fecha;
+    
+        if (!fecha) {
+            console.warn('No se encontró una fecha válida para el bloque seleccionado:', bloque);
+            return;
+        }
+    
+        const datosBloque = {
+            ...bloque,
+            fecha,
+            empleadoId: empleadoSeleccionado.id, // Aseguramos incluir empleadoId
+            empleadoNombre: empleadoSeleccionado.nombre,
+        };
+    
+        setBloqueSeleccionado(datosBloque);
+        sessionStorage.setItem('bloqueSeleccionado', JSON.stringify(datosBloque));
         sessionStorage.setItem(
             'empleadoSeleccionado',
             JSON.stringify({
@@ -84,6 +97,10 @@ const ProfesionalEspecifico = ({ negocioId, servicioId }) => {
             })
         );
         sessionStorage.setItem('fechaSeleccionada', fecha);
+    
+        console.log('Bloque Seleccionado:', datosBloque);
+        console.log('Empleado Seleccionado:', sessionStorage.getItem('empleadoSeleccionado'));
+        console.log('Fecha Seleccionada:', fecha);
     };
 
     const handleSiguiente = () => {
@@ -150,6 +167,7 @@ const ProfesionalEspecifico = ({ negocioId, servicioId }) => {
                             const fechaSeleccionada = date.toISOString().split('T')[0];
                             const diaEncontrado = diasDisponibles.find((dia) => dia.fecha === fechaSeleccionada);
                             setBloquesDisponibles(diaEncontrado ? diaEncontrado.bloques : []);
+                            sessionStorage.setItem('fechaSeleccionada', fechaSeleccionada);
                         }}
                         tileDisabled={({ date }) => {
                             if (!Array.isArray(diasDisponibles)) return true;
