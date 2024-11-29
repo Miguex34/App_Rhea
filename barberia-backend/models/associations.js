@@ -35,6 +35,10 @@ DisponibilidadEmpleado.belongsTo(EmpleadoNegocio, { foreignKey: 'id_usuario', ta
 Negocio.hasMany(EmpleadoNegocio, { foreignKey: 'id_negocio', as: 'empleados' });
 EmpleadoNegocio.belongsTo(Negocio, { foreignKey: 'id_negocio' });
 
+// Relación entre DuenoNegocio y Negocio
+DuenoNegocio.belongsTo(Negocio, { foreignKey: 'id_negocio', as: 'negocio' });
+Negocio.hasMany(DuenoNegocio, { foreignKey: 'id_negocio', as: 'duenosRelacion' });
+
 // Asociación: Un Usuario pertenece a muchos Negocios (Dueño a través de DuenoNegocio)
 Usuario.belongsToMany(Negocio, { through: DuenoNegocio, as: 'negocios', foreignKey: 'id_usuario' });
 Negocio.belongsToMany(Usuario, { through: DuenoNegocio, as: 'duenos', foreignKey: 'id_negocio' });

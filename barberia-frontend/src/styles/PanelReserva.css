@@ -1,0 +1,103 @@
+/* Contenedor general del panel */
+
+/* Estilo para el título principal del Panel */
+.panel-reservas-container h2 {
+    font-size: 28px; /* Tamaño más grande */
+    color: #A183F9; /* Color púrpura */
+    text-align: center; /* Centrado */
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Estilo para el subtítulo de las reservas del día */
+.reservas-detalles h3 {
+    font-size: 20px; /* Tamaño más grande */
+    color: rgb(0, 0, 0); /* Color blanco */
+    text-align: center; /* Centrado */
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.panel-reservas-container {
+    font-family: 'Arial', sans-serif;
+    padding: 20px;
+    background-color: #ffffff;
+    color: white;
+    border-radius: 10px;
+    
+}
+
+/* Estilos del calendario */
+.rbc-calendar {
+    background-color: whitesmoke;
+    border-radius: 10px;
+    color: rgb(32, 32, 32);
+    border: none;
+    overflow: hidden;
+}
+
+.rbc-toolbar {
+    background-color: #3b3b3b;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.rbc-toolbar button {
+    background-color: #5a55f3;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 0 5px;
+}
+
+.rbc-toolbar button:hover {
+    background-color: #786ff3;
+}
+
+.rbc-event {
+    border-radius: 5px !important;
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    padding: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Traducciones */
+.rbc-toolbar-label {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Reservas por estado */
+.reserva {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #696969;
+    color: white;
+}
+
+.reserva.confirmada {
+    background-color: #136426;
+}
+
+.reserva.pendiente {
+    background-color: #e7c250;
+    color: black;
+}
+
+.reserva.cancelada {
+    background-color: #d42f3f;
+}
+
+
+.rbc-event-content {
+    font-weight: bold;
+    font-size: 16px;
+}

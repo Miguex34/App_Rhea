@@ -188,3 +188,24 @@ exports.obtenerNegociosCompletos = async (req, res) => {
     res.status(500).json({ message: 'Error interno al obtener negocios.', error: error.message });
   }
 };
+
+exports.getNegocioByUserId = async (req, res) => {
+  try {
+    const { id } = req.user; // ID del usuario desde el token
+
+    // Buscar el negocio asociado al dueño
+    const relacion = await DuenoNegocio.findOne({
+      where: { id_usuario: id },
+      include: [{ model: Negocio, as: 'negocio' }], // Usa el alias definido
+    });
+
+    if (!relacion || !relacion.negocio) {
+      return res.status(404).json({ message: 'Negocio no encontrado para este usuario' });
+    }
+
+    res.status(200).json(relacion.negocio); // Devuelve el negocio asociado
+  } catch (error) {
+    console.error('Error al obtener el negocio por usuario:', error);
+    res.status(500).json({ error: 'Error interno al buscar negocio' });
+  }
+};
