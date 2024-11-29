@@ -230,7 +230,8 @@ exports.obtenerDisponibilidadEmpleado = async (req, res) => {
                             id_empleado: empleadoId,
                             fecha: fecha.format('YYYY-MM-DD'),
                             hora_inicio: horaInicio.format('HH:mm:ss'),
-                            hora_fin: horaFinBloque.format('HH:mm:ss')
+                            hora_fin: horaFinBloque.format('HH:mm:ss'),
+                            estado: { [Op.ne]: 'CANCELADA' } // Excluir reservas canceladas
                         }
                     });
 
