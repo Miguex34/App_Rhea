@@ -98,14 +98,15 @@ exports.obtenerDisponibilidadGeneral = async (req, res) => {
                         continue;
                     }
 
-                    // Verificar si ya existe una reserva en este bloque
+                    // Verificar si existe una reserva válida en este bloque
                     const reservaExistente = await Reserva.findOne({
                         where: {
                             id_negocio: negocioId,
                             id_empleado: empleado.id_usuario,
                             fecha: fecha.format('YYYY-MM-DD'),
                             hora_inicio: horaInicio.format('HH:mm:ss'),
-                            hora_fin: horaFinBloque.format('HH:mm:ss')
+                            hora_fin: horaFinBloque.format('HH:mm:ss'),
+                            estado: { [Op.ne]: 'CANCELADA' } // Excluir reservas canceladas
                         }
                     });
             
@@ -551,7 +552,7 @@ exports.crearReserva = async (req, res) => {
             hora_inicio,
             hora_fin,
             comentario_cliente,
-            estado: 'reservado',
+            estado: 'PENDIENTE',
             fecha_creacion: new Date(),
             cancelacion_token: cancelacionToken,
         });
@@ -602,11 +603,11 @@ exports.cancelarReserva = async (req, res) => {
             return res.status(404).json({ message: 'Reserva no encontrada o token inválido.' });
         }
 
-        if (reserva.estado === 'Cancelada') {
+        if (reserva.estado === 'CANCELADA') {
             return res.status(400).json({ message: 'La reserva ya fue cancelada.' });
         }
 
-        reserva.estado = 'Cancelada';
+        reserva.estado = 'CANCELADA';
         await reserva.save();
         console.log('Reserva cancelada exitosamente:', reserva.id);
 

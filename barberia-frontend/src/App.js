@@ -34,6 +34,7 @@ import CuentaClient from './components/CuentaClient';
 import Principal from './components/Principal';
 import Dashboard from './components/Dashboard';
 import CancelarReserva from './components/CancelarReserva';
+import Negocios from './components/Negocios';
 
 const AppContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
@@ -151,9 +152,11 @@ const AppContent = () => {
           <Route path="/confirmacion" element={<ConfirmacionReserva />} />
           <Route path="/cancelar-reserva/:token" element={<CancelarReserva />} />
 
+
           <Route path="/negocio/:nombre" element={<VistaCliente />} />
           <Route path="/cuenta-cliente" element={<CuentaClient />} />
           <Route path="/principal" element={<Principal />} />
+          <Route path="/negocios" element={<Negocios />} />
           
           {/* Rutas públicas para Login y Registro */}
           <Route path="/login" element={<Login />} />
