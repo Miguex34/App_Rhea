@@ -241,9 +241,12 @@ const Servicios = () => {
               className="mt-1 p-2 border border-gray-300 rounded w-full"
             >
               <option value="">Seleccionar duración</option>
+              <option value="15">15 minutos </option>
               <option value="30">30 minutos</option>
               <option value="60">60 minutos</option>
+              <option value="90">90 minutos </option>
               <option value="120">120 minutos</option>
+              <option value="240">240 minutos</option>
             </select>
           </div>
           <div>

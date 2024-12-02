@@ -17,10 +17,8 @@ const EmpleadoNegocio = require('./models/EmpleadoNegocio');
 const Pago = require('./models/Pago');
 const Cliente = require('./models/Cliente');
 const Evento = require('./models/Evento');
-const transbankConfig = require('./config/transbankConfig.js');
 const EmpleadoServicio = require('./models/EmpleadoServicio.js');
 const Soporte = require('./models/Soporte');
-const transbankRoutes = require('./routes/transbankRoutes');
 
 
 // Importamos las rutas
@@ -71,7 +69,6 @@ app.use('/api/panel-reservas', panelReservasRoutes);
 // Servir archivos estáticos desde la carpeta 'uploads'
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/soportes', soporteRoutes);
-app.use('/api/transbank', transbankRoutes);
 app.use('/api/clientes', clienteRoutes);
 app.use(proxyRoutes);
 
