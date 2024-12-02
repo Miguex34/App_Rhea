@@ -13,15 +13,18 @@ const Reserva = () => {
   const [formError, setFormError] = useState('');
   const [clienteInfo, setClienteInfo] = useState({ nombre: '', telefono: '', correo: '' });
   const [selectedEmpleado, setSelectedEmpleado] = useState('');
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const cargarEmpleados = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/empleados?negocioId=${negocioId}&servicioId=${servicioId}`);
+      const response = await axios.get(`${API_URL}/api/empleados`, {
+        params: { negocioId, servicioId },
+      });
       setEmpleadosDisponibles(response.data);
     } catch (error) {
       console.error('Error al cargar empleados disponibles:', error);
     }
-  }, [negocioId, servicioId]);
+  }, [negocioId, servicioId,API_URL]);
 
   useEffect(() => {
     cargarEmpleados();
@@ -55,7 +58,7 @@ const Reserva = () => {
         id_empleado: selectedEmpleado,
         cliente: clienteInfo,
       };
-      await axios.post('http://localhost:5000/api/reservas', reserva);
+      await axios.post(`${API_URL}/api/reservas`, reserva);
       alert('Reserva confirmada con éxito.');
       cerrarModalReserva();
     } catch (error) {

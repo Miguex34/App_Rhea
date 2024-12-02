@@ -10,6 +10,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false); // Nuevo estado para manejar el botón
+  const API_URL = process.env.REACT_APP_API_URL;
 
 
   const handleSubmit = async (e) => {
@@ -17,7 +18,7 @@ const Login = () => {
     setError('');
   
     try {
-      const response = await axios.post('http://localhost:5000/api/users/login', {
+      const response = await axios.post(`${API_URL}/api/users/login`, {
         correo,
         contraseña,
       });

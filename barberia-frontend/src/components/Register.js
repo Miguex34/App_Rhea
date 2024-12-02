@@ -23,10 +23,11 @@ const Register = () => {
   const [isOpen, setIsOpen] = useState(false);
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
+  const API_URL = process.env.REACT_APP_API_URL;
   // Función para buscar direcciones en Nominatim
   const searchAddress = async (query) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/address?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`${API_URL}/api/address?query=${encodeURIComponent(query)}`);
       const data = await response.json();
       setSuggestions(data);
     } catch (error) {
@@ -86,7 +87,7 @@ const Register = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users/register', formData);
+      const response = await axios.post(`${API_URL}/api/users/register`, formData);
       const { token } = response.data;
       localStorage.setItem('token', token);
       navigate('/panel-reservas');

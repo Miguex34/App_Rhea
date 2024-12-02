@@ -9,7 +9,6 @@ const Sidebar = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(true);
   const [role, setRole] = useState(null);
-
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('usuario');

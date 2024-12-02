@@ -7,12 +7,12 @@ const CancelarReserva = () => {
     const [isCancelling, setIsCancelling] = useState(false); // Estado para el botón
     const [error, setError] = useState(null); // Manejo de errores
     const navigate = useNavigate(); // Navegación para redirigir al usuario
-
+    const API_URL = process.env.REACT_APP_API_URL;
     // Manejar la cancelación de la reserva
     const handleCancelarReserva = async () => {
         setIsCancelling(true); // Mostrar que se está procesando
         try {
-            await axios.post('http://localhost:5000/api/reserva-horario/cancelar', { token });
+            await axios.post(`${API_URL}/api/reserva-horario/cancelar`, { token });
             alert('La reserva ha sido cancelada exitosamente.');
             navigate('/'); // Redirigir al usuario después de la cancelación
         } catch (error) {
@@ -22,6 +22,7 @@ const CancelarReserva = () => {
             setIsCancelling(false); // Detener la animación de carga
         }
     };
+    
 
     return (
         <div style={{ padding: '20px', textAlign: 'center' }}>

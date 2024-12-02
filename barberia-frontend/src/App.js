@@ -45,7 +45,6 @@ const AppContent = () => {
     const updateAuthState = () => {
         const token = localStorage.getItem('token');
         const usuario = JSON.parse(localStorage.getItem('usuario'));
-        const cargo = localStorage.getItem('cargo');
 
         if (token) {
             try {

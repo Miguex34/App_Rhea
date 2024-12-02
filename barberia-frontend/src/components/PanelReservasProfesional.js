@@ -13,12 +13,12 @@ const PanelReservaProfesional = ({ empleadoId }) => {
     const [eventos, setEventos] = useState([]);
     const [reservasSeleccionadas, setReservasSeleccionadas] = useState([]);
     const [diaSeleccionado, setDiaSeleccionado] = useState(new Date());
-
+    const API_URL = process.env.REACT_APP_API_URL;
     useEffect(() => {
         const obtenerReservas = async () => {
             try {
                 // Cambiar al endpoint específico del empleado
-                const response = await axios.get(`http://localhost:5000/api/panel-reservas/empleado/${empleadoId}`);
+                const response = await axios.get(`${API_URL}/api/panel-reservas/empleado/${empleadoId}`);
                 const { reservas } = response.data;
 
                 setReservas(reservas);

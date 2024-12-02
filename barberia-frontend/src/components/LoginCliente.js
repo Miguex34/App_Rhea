@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const LoginForm = ({ closeModal, setAuth }) => {
   const [formData, setFormData] = useState({ correo: '', contraseña: '' });
   const [error, setError] = useState('');
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -19,7 +20,7 @@ const LoginForm = ({ closeModal, setAuth }) => {
       return;
     }
     try {
-      const response = await axios.get('http://localhost:5000/api/clientes/me', {
+      const response = await axios.get(`${API_URL}/api/clientes/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.data) {
@@ -40,17 +41,16 @@ const LoginForm = ({ closeModal, setAuth }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/clientes/loginc', formData);
+      const response = await axios.post(`${API_URL}/api/clientes/loginc`, formData);
       
       // Guardar el token
       const token = response.data.token;
       localStorage.setItem('token', token);
 
       // Obtener datos del cliente inmediatamente
-      const userResponse = await axios.get('http://localhost:5000/api/clientes/me', {
+      const userResponse = await axios.get(`${API_URL}/api/clientes/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       // Guardar los datos del cliente en localStorage
       const user = userResponse.data;
       localStorage.setItem('user', JSON.stringify(user));

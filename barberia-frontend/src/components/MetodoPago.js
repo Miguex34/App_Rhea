@@ -8,7 +8,7 @@ import axios from 'axios';
 const MetodoPago = () => {
     window.scrollTo(0, 0); // Asegurarnos de que la vista se cargue desde el principio
     const navigate = useNavigate();
-
+    const API_URL = process.env.REACT_APP_API_URL;
     // Recuperar datos de sessionStorage
     const negocioSeleccionado = JSON.parse(sessionStorage.getItem('negocioSeleccionado'));
     const servicioSeleccionado = JSON.parse(sessionStorage.getItem('servicioSeleccionado'));
@@ -58,12 +58,13 @@ const MetodoPago = () => {
             let clienteId = sessionStorage.getItem('clienteId'); // Cambiado a let
             if (!clienteId && reservaInvitado) {
                 // Crear cliente si es invitado
-                const responseCliente = await axios.post('http://localhost:5000/api/clientes/invitado', {
+                const responseCliente = await axios.post(`${API_URL}/api/clientes/invitado`, {
                     nombre: reservaInvitado.nombre,
                     email: reservaInvitado.email,
                     telefono: reservaInvitado.telefono || null,
                     is_guest: true,
-                });
+                  });
+                  
     
                 clienteId = responseCliente.data.clienteId;
                 sessionStorage.setItem('clienteId', clienteId);
@@ -71,7 +72,7 @@ const MetodoPago = () => {
             }
     
             // Crear reserva
-            await axios.post('http://localhost:5000/api/reserva-horario/crear', {
+            await axios.post(`${API_URL}/api/reserva-horario/crear`, {
                 clienteId,
                 negocioId: negocioSeleccionado.id,
                 servicioId: servicioSeleccionado.id,

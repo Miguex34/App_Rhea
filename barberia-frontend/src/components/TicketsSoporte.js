@@ -1,5 +1,5 @@
 // archivo: TicketsSoporteAdmin.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
 import axios from 'axios';
 
 const TicketsSoporte = () => {
@@ -11,21 +11,19 @@ const TicketsSoporte = () => {
   });
   const [mensaje, setMensaje] = useState('');
   const [mostrarResueltos, setMostrarResueltos] = useState(false);
-
+  const API_URL = process.env.REACT_APP_API_URL;
 
   // Obtener todos los tickets desde la base de datos
-  useEffect(() => {
-    fetchTickets();
-  }, []);
+ 
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         return;
       }
 
-      const response = await axios.get('http://localhost:5000/api/soportes/todos', {
+      const response = await axios.get(`${API_URL}/api/soportes/todos`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -34,7 +32,12 @@ const TicketsSoporte = () => {
       console.error('Error al obtener los tickets de soporte:', error);
       setMensaje('Error al obtener los tickets de soporte.');
     }
-  };
+  }, [API_URL]); // Memoiza la función con API_URL como dependencia
+
+  // Llamar a fetchTickets al montar el componente
+  useEffect(() => {
+    fetchTickets();
+  }, [fetchTickets]);
 
   const handleFiltroChange = (e) => {
     const { name, value } = e.target;
@@ -74,7 +77,7 @@ const TicketsSoporte = () => {
       }
 
       await axios.put(
-        `http://localhost:5000/api/soportes/${ticketId}/estado`,
+        `${API_URL}/api/soportes/${ticketId}/estado`,
         { estado: nuevoEstado, respuesta },
         {
           headers: { Authorization: `Bearer ${token}` },

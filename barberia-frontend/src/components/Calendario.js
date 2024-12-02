@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { format, parse, startOfWeek, getDay, parseISO } from 'date-fns';
 import es from 'date-fns/locale/es';
 import Modal from 'react-modal';
 import axios from 'axios';
-import moment from 'moment';
-
 const locales = {
   es: es,
 };
@@ -39,28 +37,11 @@ const Calendario = () => {
   const [newEvent, setNewEvent] = useState({ titulo: '', inicio: new Date(), fin: new Date(), descripcion: '', categoria: '' });
   const [formError, setFormError] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const API_URL = process.env.REACT_APP_API_URL;
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    axios
-      .get('http://localhost:5000/api/users/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        setUser(response.data);
-        const negocio = response.data.negocio;
-        if (negocio && negocio.id) cargarEventos(negocio.id, token);
-      })
-      .catch(() => {
-        localStorage.removeItem('token');
-      });
-  }, []);
-
-  const cargarEventos = async (id_negocio, token) => {
+  const cargarEventos = useCallback(async (id_negocio, token) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/eventos/negocio/${id_negocio}`, {
+      const response = await axios.get(`${API_URL}/api/eventos/negocio/${id_negocio}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const eventosConFechaCorrecta = response.data.map(evento => ({
@@ -73,7 +54,26 @@ const Calendario = () => {
     } catch (error) {
       console.error('Error al cargar los eventos:', error);
     }
-  };
+  }, [API_URL]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+      axios.get(`${API_URL}/api/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        setUser(response.data);
+        const negocio = response.data.negocio;
+        if (negocio && negocio.id) cargarEventos(negocio.id, token);
+      })
+      .catch(() => {
+        localStorage.removeItem('token');
+      });
+  }, [API_URL,cargarEventos]);
+
+  
 
   const getCategoryColor = (categoryName) => {
     const index = predefinedCategories.indexOf(categoryName);
@@ -130,9 +130,10 @@ const Calendario = () => {
         id_usuario_creador: user.id,
       };
 
-      const response = await axios.post('http://localhost:5000/api/eventos', formattedEvent, {
+      const response = await axios.post(`${API_URL}/api/eventos`, formattedEvent, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      
 
       setEvents([...events, {
         ...response.data,
@@ -154,7 +155,7 @@ const Calendario = () => {
   const handleDeleteEvent = async (eventId) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`http://localhost:5000/api/eventos/${eventId}`, {
+      await axios.delete(`${API_URL}/api/eventos/${eventId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("Evento eliminado con éxito");
@@ -163,6 +164,7 @@ const Calendario = () => {
       console.error("Error al eliminar el evento:", error);
     }
   };
+  
 
   const puedeEliminarEvento = selectedEvent && user && (
     user.cargo === "Dueño" || user.id === selectedEvent.id_usuario_creador

@@ -7,7 +7,8 @@ const CuentaCliente = ({ isOpen, closeModal, user, fetchUser }) => {
   const [activeTab, setActiveTab] = useState('personal');
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState(null);
+  const [error] = useState(null);
+  const API_URL = process.env.REACT_APP_API_URL;
   const [formData, setFormData] = useState({
     email_cliente: '',
     celular_cliente: '',
@@ -26,7 +27,7 @@ const CuentaCliente = ({ isOpen, closeModal, user, fetchUser }) => {
         setLoading(true);
       const token = localStorage.getItem('token');
       await axios.put(
-        'http://localhost:5000/api/clientes/me',
+        `${API_URL}/api/clientes/me`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -69,10 +70,9 @@ const CuentaCliente = ({ isOpen, closeModal, user, fetchUser }) => {
       }
   
       try {
-        const response = await axios.get(
-          `http://localhost:5000/api/clientes/historial/${user.id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const response = await axios.get(`${API_URL}/api/clientes/historial/${user.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
   
         setHistorial(response.data);
       } catch (error) {
@@ -87,7 +87,7 @@ const CuentaCliente = ({ isOpen, closeModal, user, fetchUser }) => {
       setLoading(true);
       fetchHistorialReservas();
     }
-  }, [isOpen, user]);
+  }, [isOpen, user,API_URL]);
   
 
   // Asegurar que el modal esté abierto

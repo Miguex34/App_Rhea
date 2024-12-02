@@ -1,18 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import axios from 'axios';
 import Modal from './Modal'; 
 
 const Profesionales = () => {
   const [empleados, setEmpleados] = useState([]);
   const [showModal, setShowModal] = useState(false); // Estado para manejar el modal
+  const API_URL = process.env.REACT_APP_API_URL;
+
+  // Memoizar la función cargarEmpleados
+  const cargarEmpleados = useCallback(async (id_negocio) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${API_URL}/api/empleados/negocio/${id_negocio}/empleados`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Filtrar usuarios que tienen `telefono` no nulo (excluye usuarios temporales)
+      const empleadosActivos = response.data.filter(empleado => empleado.telefono !== null);
+      setEmpleados(empleadosActivos);
+    } catch (error) {
+      console.error('Error al cargar empleados:', error);
+    }
+  }, [API_URL]); // API_URL es una dependencia porque se usa en la función
 
   // Cargar datos del usuario autenticado y luego cargar empleados según el negocio
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem('token');
       try {
-        const response = await axios.get('http://localhost:5000/api/users/me', {
-          headers: { Authorization: `Bearer ${token}` }
+        const response = await axios.get(`${API_URL}/api/users/me`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         // Si el usuario tiene un negocio, cargar empleados de ese negocio
@@ -29,22 +45,10 @@ const Profesionales = () => {
       }
     };
     fetchUserData();
-  }, []);
+  }, [API_URL, cargarEmpleados]);
 
   // Función para cargar empleados según el id del negocio
-  const cargarEmpleados = async (id_negocio) => {
-    const token = localStorage.getItem('token');
-    try {
-      const response = await axios.get(`http://localhost:5000/api/empleados/negocio/${id_negocio}/empleados`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      // Filtrar usuarios que tienen `telefono` no nulo (excluye usuarios temporales)
-      const empleadosActivos = response.data.filter(empleado => empleado.telefono !== null);
-      setEmpleados(empleadosActivos);
-    } catch (error) {
-      console.error('Error al cargar empleados:', error);
-    }
-  };
+  
 
   const openModal = () => setShowModal(true);
   const closeModal = () => setShowModal(false);

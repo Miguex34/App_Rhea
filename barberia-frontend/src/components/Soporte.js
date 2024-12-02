@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
 import axios from 'axios';
 
 const FormularioSoporte = () => {
@@ -11,6 +11,7 @@ const FormularioSoporte = () => {
 
   const [mensaje, setMensaje] = useState('');
   const [tickets, setTickets] = useState([]);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -27,21 +28,53 @@ const FormularioSoporte = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Validaciones
-    if (formData.asunto === '') {
-        setMensaje('Por favor, seleccione un asunto.');
-        return;
-      }
-  
-      if (formData.descripcion.trim().length < 10 || formData.descripcion.trim().length > 500) {
-        setMensaje('La descripción debe tener entre 10 y 500 caracteres.');
+  const fetchTickets = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setMensaje('No estás autenticado. Por favor, inicia sesión.');
         return;
       }
 
+      const response = await axios.get(`${API_URL}/api/soportes/tickets`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.status === 200 && response.data.tickets) {
+        setTickets(response.data.tickets);
+      } else {
+        throw new Error('No se pudieron obtener los tickets. Intenta nuevamente.');
+      }
+    } catch (error) {
+      console.error('Error al obtener los tickets de soporte:', error);
+      setMensaje(
+        error.response?.data?.message || 'Error al obtener los tickets de soporte. Intenta más tarde.'
+      );
+    }
+  }, [API_URL]);
+
+  // Manejar la creación de tickets
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validaciones
+    if (!formData.asunto) {
+      setMensaje('Por favor, seleccione un asunto.');
+      return;
+    }
+
+    if (formData.descripcion.trim().length < 10 || formData.descripcion.trim().length > 500) {
+      setMensaje('La descripción debe tener entre 10 y 500 caracteres.');
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setMensaje('No estás autenticado. Por favor, inicia sesión.');
+        return;
+      }
+
       const formDataToSend = new FormData();
       formDataToSend.append('asunto', formData.asunto);
       formDataToSend.append('descripcion', formData.descripcion);
@@ -50,44 +83,31 @@ const FormularioSoporte = () => {
         formDataToSend.append('imagen', formData.imagen);
       }
 
-      const response = await axios.post('http://localhost:5000/api/soportes/crear', formDataToSend, {
+      const response = await axios.post(`${API_URL}/api/soportes/crear`, formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
       });
 
-      setMensaje('Ticket creado exitosamente.');
-      fetchTickets();
+      if (response.status === 200 || response.status === 201) {
+        setMensaje('Ticket creado exitosamente.');
+        fetchTickets(); // Actualiza la lista de tickets
+      } else {
+        throw new Error('No se pudo crear el ticket. Intenta nuevamente.');
+      }
     } catch (error) {
       console.error('Error al crear el ticket:', error);
-      setMensaje('Error al crear el ticket.');
+      setMensaje(
+        error.response?.data?.message || 'Error al crear el ticket. Por favor, intenta más tarde.'
+      );
     }
   };
 
-  // Función para obtener todos los tickets del usuario
-  const fetchTickets = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        return;
-      }
-
-      const response = await axios.get('http://localhost:5000/api/soportes/tickets', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setTickets(response.data.tickets);
-    } catch (error) {
-      console.error('Error al obtener los tickets de soporte:', error);
-      setMensaje('Error al obtener los tickets de soporte.');
-    }
-  };
-
-  // Obtener los tickets cuando el componente se monta
+  // Llamar a fetchTickets al montar el componente
   useEffect(() => {
     fetchTickets();
-  }, []);
+  }, [fetchTickets]);
 
   const getCardStyle = (estado) => {
     switch (estado) {

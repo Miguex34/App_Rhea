@@ -11,7 +11,7 @@ const Resumen = () => {
     const empleadoSeleccionado = JSON.parse(sessionStorage.getItem('empleadoSeleccionado'));
     const bloqueSeleccionado = JSON.parse(sessionStorage.getItem('bloqueSeleccionado'));
     const fechaSeleccionada = sessionStorage.getItem('fechaSeleccionada');
-
+    const API_URL = process.env.REACT_APP_API_URL;
     // Función para confirmar la reserva
     const handleConfirmarReserva = async () => {
         if (!negocioSeleccionado || !servicioSeleccionado || !empleadoSeleccionado || !bloqueSeleccionado || !fechaSeleccionada) {
@@ -31,8 +31,9 @@ const Resumen = () => {
         };
 
         try {
-            const response = await axios.post('http://localhost:5000/api/reserva-horario/reservar', reservaData);
+            const response = await axios.post(`${API_URL}/api/reserva-horario/reservar`, reservaData);
             console.log('Reserva confirmada:', response.data);
+
 
             alert('Reserva confirmada con éxito.');
             sessionStorage.clear(); // Opcional: limpiar el sessionStorage

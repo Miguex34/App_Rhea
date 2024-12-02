@@ -13,16 +13,16 @@ const PanelReservas = () => {
     const [eventos, setEventos] = useState([]);
     const [reservasSeleccionadas, setReservasSeleccionadas] = useState([]);
     const [diaSeleccionado, setDiaSeleccionado] = useState(new Date());
-
+    const API_URL = process.env.REACT_APP_API_URL;
     useEffect(() => {
         // Obtener el ID del negocio dinámicamente
         const obtenerNegocioId = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/negocios/usuario/negocio', {
+                const response = await axios.get(`${API_URL}/api/negocios/usuario/negocio`, {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`, // Asegúrate de que el token esté disponible
+                      Authorization: `Bearer ${localStorage.getItem('token')}`, // Asegúrate de que el token esté disponible
                     },
-                });
+                  });
                 setNegocioId(response.data.id); // Guarda el ID del negocio
             } catch (error) {
                 console.error('Error al obtener el ID del negocio:', error);
@@ -30,16 +30,17 @@ const PanelReservas = () => {
         };
 
         obtenerNegocioId();
-    }, []);
+    }, [API_URL]);
 
     useEffect(() => {
         // Una vez que tengamos el ID del negocio, obtener las reservas
         const obtenerReservas = async () => {
             if (!negocioId) return; // Esperar a tener el ID del negocio
             try {
-                const response = await axios.get(`http://localhost:5000/api/panel-reservas/${negocioId}`, {
+                
+                const response = await axios.get(`${API_URL}/api/panel-reservas/${negocioId}`, {
                     headers: {
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
                     },
                 });
                 const { reservas } = response.data;
@@ -64,7 +65,7 @@ const PanelReservas = () => {
         };
 
         obtenerReservas();
-    }, [negocioId]); // Dependencia en el ID del negocio
+    }, [negocioId,API_URL]); // Dependencia en el ID del negocio
 
     const handleSeleccionarDia = (date) => {
         setDiaSeleccionado(date);

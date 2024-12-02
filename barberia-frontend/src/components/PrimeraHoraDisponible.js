@@ -26,7 +26,7 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
     const [servicioNombre, setServicioNombre] = useState('');
     const [sinDisponibilidad, setSinDisponibilidad] = useState(false);
     const navigate = useNavigate();
-
+    const API_URL = process.env.REACT_APP_API_URL;
     useEffect(() => {
         console.log('Inicializando PrimeraHoraDisponible...');
         console.log('Antes de limpiar:', sessionStorage);
@@ -41,9 +41,9 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
         }
 
         axios
-            .get(`http://localhost:5000/api/reserva-horario/disponibilidad/general/${negocioId}/${servicioId}`)
-            .then((response) => {
-                const { negocio, servicio, diasDisponibles } = response.data;
+        .get(`${API_URL}/api/reserva-horario/disponibilidad/general/${negocioId}/${servicioId}`)
+        .then((response) => {
+          const { negocio, servicio, diasDisponibles } = response.data;
                 setDiasDisponibles(diasDisponibles);
                 setNegocioNombre(negocio.nombre);
                 setServicioNombre(servicio.nombre);
@@ -57,7 +57,7 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
                 setError('Error al obtener disponibilidad: ' + error.message);
                 setLoading(false);
             });
-    }, [negocioId, servicioId]);
+    }, [negocioId, servicioId,API_URL]);
 
     const handleDiaSeleccion = (date) => {
         const dia = moment(date).format('YYYY-MM-DD');

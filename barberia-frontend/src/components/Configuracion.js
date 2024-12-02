@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback  } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { FcSms, FcSupport } from 'react-icons/fc';
+import { FcSupport } from 'react-icons/fc';
 
 const Configuracion = () => {
   const [formData, setFormData] = useState({
@@ -18,30 +18,33 @@ const Configuracion = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   // Función para obtener datos del usuario
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get('http://localhost:5000/api/users/me', {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.get(`${API_URL}/api/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       setFormData((prevData) => ({
         ...prevData,
         nombre: response.data.nombre,
         correo: response.data.correo,
         telefono: response.data.telefono,
-        foto_perfil: response.data.foto_perfil
+        foto_perfil: response.data.foto_perfil,
       }));
     } catch (error) {
       console.error('Error al obtener los datos del usuario:', error);
     }
-  };
+  }, [API_URL]); // API_URL como dependencia porque se usa dentro de fetchUserData
 
   // Llama a fetchUserData al montar el componente
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [fetchUserData]); // Incluye fetchUserData como dependencia
+
 
   const validate = () => {
     const newErrors = {};
@@ -93,8 +96,8 @@ const Configuracion = () => {
         updateData.nuevaContraseña = formData.nuevaContraseña;
       }
 
-      await axios.put('http://localhost:5000/api/users/update', updateData, {
-        headers: { Authorization: `Bearer ${token}` }
+      await axios.put(`${API_URL}/api/users/update`, updateData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       setSuccessMessage('Datos actualizados correctamente');
@@ -119,12 +122,13 @@ const Configuracion = () => {
     formData.append('profileImage', profileImage);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/users/upload-profile-image', formData, {
+      const response = await axios.post(`${API_URL}/api/users/upload-profile-image`, formData, {
         headers: { 
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       });
+      
       setSuccessMessage('Foto de perfil actualizada correctamente');
 
       // Actualiza el estado con la URL de la nueva imagen y vuelve a cargar los datos del usuario
@@ -163,14 +167,7 @@ const Configuracion = () => {
           <p className="text-sm text-gray-500">Edita tu perfil</p>
         </div>
       </div>
-      <Link to="/notificaciones" className="cursor-pointer flex items-center space-x-4 p-4 bg-gray-100 rounded-md mb-6">
-        <div className="h-12 w-12 flex items-center justify-center">
-          <FcSms className="text-4xl" /> {/* Icono de Notificaciones */}
-        </div>
-        <div>
-          <h3 className="text-lg font-medium text-gray-800">Notificaciones</h3>
-        </div>
-      </Link>
+      
 
       <Link to="/soporte" className="cursor-pointer flex items-center space-x-4 p-4 bg-gray-100 rounded-md mb-6">
         <div className="h-12 w-12 flex items-center justify-center">

@@ -22,16 +22,16 @@ const VistaCliente = () => {
   const [auth, setAuth] = useState(!!localStorage.getItem('token'));
   const [modalOpen, setModalOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [history, setHistory] = useState([]);
+  const [history] = useState([]);
   const [negocios, setNegocios] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
-
+  const API_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     // Función para obtener información del negocio, servicios y horarios
     const fetchData = async () => {
       try {
         // Obtener el negocio por su nombre
-        const responseNegocio = await axios.get(`http://localhost:5000/api/negocios/${nombre}`);
+        const responseNegocio = await axios.get(`${API_URL}/api/negocios/${nombre}`);
         setNegocio(responseNegocio.data);
 
         // Guardar `negocioId` en `sessionStorage` para uso en otros componentes
@@ -44,8 +44,8 @@ const VistaCliente = () => {
 
         // Realizar las solicitudes de servicios y horarios en paralelo
         const [responseServicios, responseHorarios] = await Promise.all([
-          axios.get(`http://localhost:5000/api/servicios/negocio/${negocioId}`),
-          axios.get(`http://localhost:5000/api/horarios/negocio/${negocioId}`)
+          axios.get(`${API_URL}/api/servicios/negocio/${negocioId}`),
+          axios.get(`${API_URL}/api/horarios/negocio/${negocioId}`)
         ]);
 
         // Establecer los servicios y horarios en el estado
@@ -59,7 +59,7 @@ const VistaCliente = () => {
       }
     };
     fetchData();
-  }, [nombre]);
+  }, [nombre,API_URL]);
   
   const handleOpenLoginModal = () => {
     setModalLoginOpen(true);
@@ -103,14 +103,14 @@ const VistaCliente = () => {
         setAuth(true); // Usuario autenticado
         try {
           // Solo realiza la solicitud al servidor si el usuario no está en localStorage
-          const response = await axios.get('http://localhost:5000/api/clientes/me', {
+          const responseCliente = await axios.get(`${API_URL}/api/clientes/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
   
-          if (response.data) {
-            console.log('Datos del usuario obtenidos del servidor:', response.data);
-            setUser(response.data); // Actualiza el estado del usuario
-            localStorage.setItem('user', JSON.stringify(response.data)); // Sincronizar localStorage
+          if (responseCliente.data) {
+            console.log('Datos del usuario obtenidos del servidor:', responseCliente.data);
+            setUser(responseCliente.data); // Actualiza el estado del usuario
+            localStorage.setItem('user', JSON.stringify(responseCliente.data)); // Sincronizar localStorage
           } else {
             console.warn('La respuesta no contiene datos del usuario.');
           }
@@ -139,14 +139,14 @@ const VistaCliente = () => {
     return () => {
       window.removeEventListener('storage', handleStorageChange); // Limpiar listener al desmontar
     };
-  }, []);
+  }, [API_URL]);
   
 
   useEffect(() => {
     const fetchNegocios = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/negocios/completos');
-        const negociosFiltrados = response.data.filter(negocio => 
+        const responseNegocios = await axios.get(`${API_URL}/api/negocios/completos`);
+        const negociosFiltrados = responseNegocios.data.filter(negocio => 
           negocio.nombre && negocio.telefono && negocio.direccion && negocio.categoria
         );
         setNegocios(negociosFiltrados);
@@ -157,7 +157,7 @@ const VistaCliente = () => {
     };
 
     fetchNegocios();
-  }, []);
+  }, [API_URL]);
 
   const handleNegocioClick = (nombre) => {
     navigate(`/negocio/${nombre}`);

@@ -42,7 +42,11 @@ const proxyRoutes = require('./routes/proxyRoutes');
 const soporteRoutes = require('./routes/soporteRoutes');
 const clienteRoutes = require('./routes/clienteRoutes');
 // Middleware para procesar JSON y habilitar CORS
-app.use(cors());
+app.use(cors({
+  origin: '*', // Cambiar '*' a tu dominio cuando esté en producción.
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+}));
+
 app.use(express.json());
 app.use(bodyParser.json());
 

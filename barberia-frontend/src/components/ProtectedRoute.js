@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import axios from 'axios';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [userRole, setUserRole] = useState(null); // Para almacenar el cargo del usuario
-  const location = useLocation();
 
   useEffect(() => {
     const checkAuth = async () => {

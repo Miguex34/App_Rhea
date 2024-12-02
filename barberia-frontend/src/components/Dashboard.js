@@ -11,6 +11,7 @@ const Dashboard = () => {
   // Estados para Reservaciones por Empleado
   const [dataEmpleados, setDataEmpleados] = useState([]);
   const [loadingEmpleados, setLoadingEmpleados] = useState(true);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   // Estados para Reservas por Fecha
   const [dataEvolucion, setDataEvolucion] = useState([]);
@@ -40,11 +41,11 @@ const Dashboard = () => {
       if (!token) return;
 
       try {
-        const response = await axios.get('http://localhost:5000/api/reservas/empleados', {
+        const response = await axios.get(`${API_URL}/api/reservas/empleados`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        });
+        });        
         setDataEmpleados(response.data);
         setLoadingEmpleados(false);
       } catch (error) {
@@ -53,7 +54,7 @@ const Dashboard = () => {
     };
 
     fetchReservasPorEmpleado();
-  }, []);
+  }, [API_URL]);
 
   // Fetch para Evolución de Reservas en el Tiempo
   useEffect(() => {
@@ -62,7 +63,8 @@ const Dashboard = () => {
       if (!token) return;
 
       try {
-        const response = await axios.get(`http://localhost:5000/api/reservas/reservas-por-fecha?rango=${rango}`, {
+        const response = await axios.get(`${API_URL}/api/reservas/reservas-por-fecha`, {
+          params: { rango },
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -84,7 +86,7 @@ const Dashboard = () => {
     };
 
     fetchReservasEvolucion();
-  }, [rango]);
+  }, [rango,API_URL]);
 
   const COLORS = ['#6B4226', '#D9A066', '#F4D03F', '#28B463', '#1F618D'];
   // Fetch para Ventas por Mes
@@ -94,7 +96,7 @@ const Dashboard = () => {
       if (!token) return;
 
       try {
-        const response = await axios.get('http://localhost:5000/api/reservas/reservas-por-mes', {
+        const response = await axios.get(`${API_URL}/api/reservas/reservas-por-mes`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -113,7 +115,7 @@ const Dashboard = () => {
     };
 
     fetchReservasPorMes();
-  }, []);
+  }, [API_URL]);
 
   if (loadingEmpleados || loadingEvolucion || loadingMes) {
     return <p style={{ textAlign: 'center', marginTop: '20px' }}>Cargando datos...</p>;

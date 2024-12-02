@@ -13,8 +13,9 @@ const ProfesionalEspecifico = ({ negocioId, servicioId }) => {
     const [negocioNombre, setNegocioNombre] = useState('');
     const [servicioNombre, setServicioNombre] = useState('');
     // eslint-disable-next-line no-unused-vars
-    const [loading, setLoading] = useState(false);
+    const [setLoading] = useState(false);
     const navigate = useNavigate();
+    const API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         console.log('Inicializando ProfesionalEspecifico...');
@@ -25,12 +26,13 @@ const ProfesionalEspecifico = ({ negocioId, servicioId }) => {
         const fetchDatos = async () => {
             try {
                 const generalResponse = await axios.get(
-                    `http://localhost:5000/api/reserva-horario/disponibilidad/general/${negocioId}/${servicioId}`
-                );
-
-                const empleadosResponse = await axios.get(
-                    `http://localhost:5000/api/reserva-horario/disponibilidad/empleados/${negocioId}/${servicioId}`
-                );
+                    `${API_URL}/api/reserva-horario/disponibilidad/general/${negocioId}/${servicioId}`
+                  );
+                  
+                  // Obtener disponibilidad por empleados
+                  const empleadosResponse = await axios.get(
+                    `${API_URL}/api/reserva-horario/disponibilidad/empleados/${negocioId}/${servicioId}`
+                  );
 
                 const { negocio, servicio, diasDisponibles: dias } = generalResponse.data;
 
@@ -45,7 +47,7 @@ const ProfesionalEspecifico = ({ negocioId, servicioId }) => {
         };
 
         fetchDatos();
-    }, [negocioId, servicioId]);
+    }, [negocioId, servicioId, API_URL]);
 
     const handleSeleccionarEmpleado = async (empleado) => {
         setEmpleadoSeleccionado(empleado);
@@ -53,8 +55,8 @@ const ProfesionalEspecifico = ({ negocioId, servicioId }) => {
 
         try {
             const response = await axios.get(
-                `http://localhost:5000/api/reserva-horario/disponibilidad/empleado/${negocioId}/${servicioId}/${empleado.id}`
-            );
+                `${API_URL}/api/reserva-horario/disponibilidad/empleado/${negocioId}/${servicioId}/${empleado.id}`
+              );
             setDiasDisponibles(response.data.diasDisponibles || []); // Manejo seguro
         } catch (error) {
             console.error('Error al obtener disponibilidad del empleado:', error);

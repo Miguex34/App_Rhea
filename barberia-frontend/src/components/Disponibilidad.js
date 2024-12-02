@@ -14,24 +14,26 @@ const Disponibilidad = () => {
   const [selectedHorario, setSelectedHorario] = useState(null);
   const [formError, setFormError] = useState('');
   const [clienteInfo, setClienteInfo] = useState({ nombre: '', telefono: '', correo: '' });
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const cargarHorarios = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/horarios/${negocioId}`);
+      const response = await axios.get(`${API_URL}/api/horarios/${negocioId}`);
       setHorarios(response.data);
     } catch (error) {
       console.error('Error al cargar horarios:', error);
     }
-  }, [negocioId]);
+  }, [negocioId,API_URL]);
 
   const cargarEmpleados = useCallback(async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/empleados?negocioId=${negocioId}&servicioId=${servicioId}`);
-      setEmpleadosDisponibles(response.data);
+      const response = await axios.get(`${API_URL}/api/empleados`, {
+        params: { negocioId, servicioId },
+      });      setEmpleadosDisponibles(response.data);
     } catch (error) {
       console.error('Error al cargar empleados disponibles:', error);
     }
-  }, [negocioId, servicioId]);
+  }, [negocioId, servicioId,API_URL]);
 
   useEffect(() => {
     cargarHorarios();

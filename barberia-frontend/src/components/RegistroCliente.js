@@ -12,7 +12,7 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
 
   const [successMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
+  const API_URL = process.env.REACT_APP_API_URL;
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -25,7 +25,7 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:5000/api/clientes/register', formData);
+      const response = await axios.post(`${API_URL}/api/clientes/register`, formData);
 
       // Guarda el token en localStorage
       localStorage.setItem('token', response.data.token);

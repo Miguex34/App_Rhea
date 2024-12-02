@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -23,6 +23,8 @@ const categorias = [
 ];
 const Cuenta = () => {
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL;
+  const token = localStorage.getItem('token');
 
   // Estado para el usuario logeado
   const [user, setUser] = useState({ nombre: '', correo: '', id_negocio: null });
@@ -39,32 +41,56 @@ const Cuenta = () => {
   const [logoUrl, setLogoUrl] = useState('');
   const [realizaServicios, setRealizaServicios] = useState(false); // Estado del checkbox
   const [disponibilidad, setDisponibilidad] = useState([]); // 
-  const [isSavingDisponibilidad, setIsSavingDisponibilidad] = useState(false);
+  const [isSavingDisponibilidad] = useState(false);
 
-  // Obtener el usuario logeado y su negocio al cargar el componente
+  const fetchHorarios = useCallback(async (id_negocio) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/horarios/negocio/${id_negocio}`);
+      const fetchedHorarios = Array.isArray(response.data)
+        ? response.data.map(horario => ({
+            dia: horario.dia_semana,
+            desde: horario.hora_inicio,
+            hasta: horario.hora_fin,
+            cerrado: !horario.activo,
+          }))
+        : diasSemana.map(dia => ({
+            dia: dia,
+            desde: '08:00',
+            hasta: '19:00',
+            cerrado: false,
+          }));
+      setHorarios(fetchedHorarios);
+    } catch (error) {
+      console.error('Error al obtener los horarios:', error);
+      setHorarios(
+        diasSemana.map(dia => ({
+          dia: dia,
+          desde: '08:00',
+          hasta: '19:00',
+          cerrado: false,
+        }))
+      );
+    }
+  }, [API_URL]);
+
   useEffect(() => {
-    const token = localStorage.getItem('token');
     if (!token) {
       navigate('/login');
       return;
     }
-  
-    const fetchDisponibilidad = async (id_usuario) => {
+
+    const fetchDisponibilidad = async id_usuario => {
       try {
-        const response = await axios.get(
-          `http://localhost:5000/api/users/disponibilidad/${id_usuario}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-  
+        const response = await axios.get(`${API_URL}/api/users/disponibilidad/${id_usuario}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
         if (response.data.length) {
-          setDisponibilidad(response.data); // Asigna la disponibilidad al estado
-          setRealizaServicios(true); // Marca el checkbox si hay disponibilidad
+          setDisponibilidad(response.data);
+          setRealizaServicios(true);
         } else {
-          // Si no hay datos, configura valores predeterminados y desmarca el checkbox
           setDisponibilidad(
-            diasSemana.map((dia) => ({
+            diasSemana.map(dia => ({
               dia_semana: dia.toLowerCase(),
               hora_inicio: '08:00',
               hora_fin: '18:00',
@@ -76,26 +102,23 @@ const Cuenta = () => {
       } catch (error) {
         console.error('Error al obtener disponibilidad:', error);
         setDisponibilidad(
-          diasSemana.map((dia) => ({
+          diasSemana.map(dia => ({
             dia_semana: dia.toLowerCase(),
             hora_inicio: '08:00',
             hora_fin: '18:00',
             disponible: true,
           }))
         );
-        setRealizaServicios(false); // En caso de error, asegurarse de que esté desactivado
+        setRealizaServicios(false);
       }
     };
-  
-    const checkEmpleadoStatus = async (id_usuario) => {
+
+    const checkEmpleadoStatus = async id_usuario => {
       try {
-        const response = await axios.get(
-          `http://localhost:5000/api/users/empleado/${id_usuario}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-    
+        const response = await axios.get(`${API_URL}/api/users/empleado/${id_usuario}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
         if (response.data.realizaServicios) {
           setRealizaServicios(true);
         } else {
@@ -106,13 +129,13 @@ const Cuenta = () => {
         setRealizaServicios(false);
       }
     };
-  
-    axios
-      .get('http://localhost:5000/api/users/me', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        console.log('Usuario autenticado:', response.data);
+
+    axios.get(`${API_URL}/api/users/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((response) => {
+      console.log('Usuario autenticado:', response.data);
+      setUser(response.data);
         setUser(response.data);
   
         const negocio = response.data.negocio;
@@ -137,39 +160,12 @@ const Cuenta = () => {
         localStorage.removeItem('token');
         navigate('/login');
       });
-  }, [navigate]);
+  }, [navigate,API_URL,fetchHorarios,token]);
   
   
 
   // Función para obtener los horarios desde el backend
-  const fetchHorarios = async (id_negocio) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/api/horarios/negocio/${id_negocio}`);
-
-      // Asegúrate de que la respuesta es un array
-      const fetchedHorarios = Array.isArray(response.data) ? response.data.map(horario => ({
-        dia: horario.dia_semana,
-        desde: horario.hora_inicio,
-        hasta: horario.hora_fin,
-        cerrado: !horario.activo
-      })) : diasSemana.map((dia) => ({
-        dia: dia,
-        desde: '08:00',  // Valores predeterminados
-        hasta: '19:00',
-        cerrado: false,
-      }));
-      
-      setHorarios(fetchedHorarios);
-    } catch (error) {
-      console.error('Error al obtener los horarios:', error);
-      setHorarios(diasSemana.map((dia) => ({
-        dia: dia,
-        desde: '08:00',  // Valores predeterminados
-        hasta: '19:00',
-        cerrado: false,
-      })));
-    }
-  };
+  
 
   // Manejar cambios en los campos del formulario
   const handleChange = (e) => {
@@ -212,9 +208,8 @@ const Cuenta = () => {
       }
   
       // Enviar la categoría al backend
-      await axios.put(
-        `http://localhost:5000/api/negocios/${user.negocio.id}/categoria`,
-        { categoria: nuevaCategoria },
+      await axios.put(`${API_URL}/api/negocios/${user.negocio.id}/categoria`, 
+        { categoria: nuevaCategoria }, 
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -255,11 +250,13 @@ if (!descripcionRegex.test(descripcion)) {
         return;
       }
   
-      const response = await axios.put(`http://localhost:5000/api/negocios/${user.negocio.id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await axios.put(`${API_URL}/api/negocios/${user.negocio.id}`, 
+        formData, 
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
       });
       
 

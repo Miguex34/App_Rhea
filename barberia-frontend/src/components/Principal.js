@@ -7,15 +7,14 @@ import { useNavigate } from "react-router-dom";
 
 const Principal = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [negocios, setNegocios] = useState([]);
+  const [setNegocios] = useState([]);
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     const fetchNegocios = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:5000/api/negocios/completos"
-        );
+        const response = await axios.get(`${API_URL}/api/negocios/completos`);
         const negociosFiltrados = response.data.filter(
           (negocio) =>
             negocio.nombre &&
@@ -30,11 +29,8 @@ const Principal = () => {
     };
 
     fetchNegocios();
-  }, []);
+  }, [API_URL,setNegocios]);
 
-  const handleNegocioClick = (nombre) => {
-    navigate(`/negocio/${nombre}`);
-  };
 
   return (
     <div className="homepage-container">

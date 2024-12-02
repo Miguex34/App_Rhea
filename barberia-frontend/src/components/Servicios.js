@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import { ToastContainer, toast } from 'react-toastify';
@@ -16,10 +16,36 @@ const Servicios = () => {
     id_negocio: null,
   });
   const [servicios, setServicios] = useState([]);
-  const [empleados, setEmpleados] = useState([]);
+  const [empleados] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const navigate = useNavigate();
-  const [user, setUser] = useState({ nombre: '', correo: '', id_negocio: null });
+  const [setUser] = useState({ nombre: '', correo: '', id_negocio: null });
+  const API_URL = process.env.REACT_APP_API_URL;
+
+  const cargarServicios = useCallback(async (id_negocio) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/api/servicios/negocio/${id_negocio}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log('Servicios cargados:', response.data);
+    } catch (error) {
+      console.error('Error al cargar servicios:', error);
+    }
+  }, [API_URL]);
+
+  const cargarEmpleados = useCallback(async (id_negocio) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/api/empleados/negocio/${id_negocio}/empleados`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log('Empleados cargados:', response.data);
+    } catch (error) {
+      console.error('Error al cargar empleados:', error);
+    }
+  }, [API_URL]);
+
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -27,15 +53,15 @@ const Servicios = () => {
       navigate('/login');
       return;
     }
-  
+
     axios
-      .get('http://localhost:5000/api/users/me', {
+      .get(`${API_URL}/api/users/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((response) => {
         console.log('Usuario autenticado:', response.data);
         setUser(response.data);
-  
+
         const negocio = response.data.negocio;
         if (negocio && negocio.id) {
           console.log('Cargando datos para el negocio:', negocio.id);
@@ -52,31 +78,7 @@ const Servicios = () => {
         localStorage.removeItem('token');
         navigate('/login');
       });
-  }, [navigate]);
-
-  const cargarServicios = async (id_negocio) => {
-    const token = localStorage.getItem('token');
-    try {
-      const response = await axios.get(`http://localhost:5000/api/servicios/negocio/${id_negocio}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setServicios(response.data);
-    } catch (error) {
-      console.error('Error al cargar servicios:', error);
-    }
-  };
-
-  const cargarEmpleados = async (id_negocio) => {
-    const token = localStorage.getItem('token');
-    try {
-      const response = await axios.get(`http://localhost:5000/api/empleados/negocio/${id_negocio}/empleados`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setEmpleados(response.data);
-    } catch (error) {
-      console.error('Error al cargar empleados:', error);
-    }
-  };
+  }, [navigate, API_URL, cargarServicios, cargarEmpleados,setUser]);
 
   // Manejar cambios en el formulario
   const handleChange = (e) => {
@@ -132,8 +134,8 @@ const Servicios = () => {
     const token = localStorage.getItem('token');
     try {
       const url = editingId
-        ? `http://localhost:5000/api/servicios/${editingId}`
-        : 'http://localhost:5000/api/servicios';
+        ? `${API_URL}/api/servicios/${editingId}`
+        : `${API_URL}/api/servicios`;
       const method = editingId ? 'put' : 'post';
       await axios[method](
         url,
@@ -187,7 +189,7 @@ const Servicios = () => {
   const handleDelete = async (id) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`http://localhost:5000/api/servicios/${id}`, {
+      await axios.delete(`${API_URL}/api/servicios/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       // Eliminar el servicio de la lista sin recargar todos los servicios

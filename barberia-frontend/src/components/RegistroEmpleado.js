@@ -9,7 +9,7 @@ import 'dayjs/locale/es'; // Para asegurar el uso de formato 24h con localizaci�
 const RegistroEmpleado = () => {
   const { token } = useParams();
   const navigate = useNavigate();
-
+  const API_URL = process.env.REACT_APP_API_URL;
   const [formData, setFormData] = useState({
     nombre: '',
     contraseña: '',
@@ -78,7 +78,7 @@ const RegistroEmpleado = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        await axios.post(`http://localhost:5000/api/empleados/registro/${token}`, formData);
+        await axios.post(`${API_URL}/api/empleados/registro/${token}`, formData);
         alert('Registro completado con éxito');
         navigate('/login');
       } catch (error) {

@@ -7,7 +7,7 @@ import logorhea from "../assets/images/logorhea.png";
 const PasoRegistroReserva = () => {
     window.scrollTo(0, 0);
     const navigate = useNavigate();
-
+    const API_URL = process.env.REACT_APP_API_URL;
     // Recuperar datos del sessionStorage
     const negocioSeleccionado = JSON.parse(sessionStorage.getItem('negocioSeleccionado'));
     const servicioSeleccionado = JSON.parse(sessionStorage.getItem('servicioSeleccionado'));
@@ -66,9 +66,9 @@ const PasoRegistroReserva = () => {
         if (!formData.email) return;
 
         try {
-            const response = await axios.get(`http://localhost:5000/api/clientes/verificar-correo`, {
+            const response = await axios.get(`${API_URL}/api/clientes/verificar-correo`, {
                 params: { email: formData.email },
-            });
+              });              
             if (response.data.registrado) {
                 setEmailError('El correo ya está registrado.');
             } else {
