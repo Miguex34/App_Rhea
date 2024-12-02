@@ -1,38 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
+const FormularioSoporte = () => {
+  const [formData, setFormData] = useState({
+    asunto: '',
+    descripcion: '',
+    prioridad: 'media',
+    imagen: null,
+  });
 
-const Soporte = () => {
-  const navigate = useNavigate();
-  
-  const [user, setUser] = useState({ nombre: '', correo: '', id_negocio: null });
-  const [asunto, setAsunto] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [prioridad, setPrioridad] = useState('media');
-  const [imagen, setImagen] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [mensaje, setMensaje] = useState('');
+  const [tickets, setTickets] = useState([]);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
-      return;
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === 'imagen') {
+      setFormData({
+        ...formData,
+        imagen: files[0],
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
     }
-    
-    axios.get('http://localhost:5000/api/users/me', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then((response) => {
-      setUser(response.data);
-    })
-    .catch((error) => {
-      console.error('Error al obtener el usuario:', error);
-      localStorage.removeItem('token');
-      navigate('/login');
-    });
-  }, [navigate]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,18 +52,53 @@ const Soporte = () => {
 
       const response = await axios.post('http://localhost:5000/api/soportes/crear', formDataToSend, {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
         },
       });
-      setSuccessMessage('Solicitud de soporte enviada correctamente.');
-      setAsunto('');
-      setDescripcion('');
-      setPrioridad('media');
-      setImagen(null);
+
+      setMensaje('Ticket creado exitosamente.');
+      fetchTickets();
     } catch (error) {
-      console.error('Error al enviar solicitud de soporte:', error);
-      setErrorMessage('Hubo un problema al enviar la solicitud.');
+      console.error('Error al crear el ticket:', error);
+      setMensaje('Error al crear el ticket.');
+    }
+  };
+
+  // Función para obtener todos los tickets del usuario
+  const fetchTickets = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        return;
+      }
+
+      const response = await axios.get('http://localhost:5000/api/soportes/tickets', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setTickets(response.data.tickets);
+    } catch (error) {
+      console.error('Error al obtener los tickets de soporte:', error);
+      setMensaje('Error al obtener los tickets de soporte.');
+    }
+  };
+
+  // Obtener los tickets cuando el componente se monta
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const getCardStyle = (estado) => {
+    switch (estado) {
+      case 'pendiente':
+        return 'bg-yellow-100 border-yellow-300';
+      case 'en_progreso':
+        return 'bg-blue-100 border-blue-300';
+      case 'resuelto':
+        return 'bg-green-100 border-green-300';
+      default:
+        return 'bg-gray-100 border-gray-300';
     }
   };
 
@@ -181,5 +209,4 @@ const Soporte = () => {
   );
 };
 
-export default Soporte;
-
+export default FormularioSoporte;

@@ -4,7 +4,6 @@ import axios from 'axios';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
 import 'dayjs/locale/es'; // Para asegurar el uso de formato 24h con localización
 
 const RegistroEmpleado = () => {

@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
-const { register, login, getUserById, getLoggedUser,updateUser, uploadProfileImage } = require('../controllers/userController');
+const { register, login, getUserById, getLoggedUser,updateUser, uploadProfileImage, registrarComoEmpleado, guardarDisponibilidad, obtenerDisponibilidad, eliminarDeEmpleadoNegocio, checkEmpleadoStatus } = require('../controllers/userController');
 const upload = require('../middleware/upload');
 
 // Rutas de usuario
@@ -20,5 +20,21 @@ router.post('/upload-profile-image', authMiddleware, (req, res) => {
       uploadProfileImage(req, res);
     });
   });
+
+  router.post('/registrar-empleado', authMiddleware, registrarComoEmpleado);
+
+  // Ruta para guardar disponibilidad del empleado
+  router.post('/guardar-disponibilidad', authMiddleware, guardarDisponibilidad);
+  
+  // Ruta para obtener disponibilidad del empleado
+  router.get('/disponibilidad/:id_usuario', authMiddleware, obtenerDisponibilidad);
+  
+  // Ruta para eliminar al usuario de empleado_negocio
+  router.post('/eliminar-empleado', authMiddleware, eliminarDeEmpleadoNegocio);
+
+  router.get('/empleado/:id_usuario', authMiddleware, checkEmpleadoStatus);
+
+
+
   
 module.exports = router;

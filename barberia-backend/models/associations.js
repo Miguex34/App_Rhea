@@ -28,29 +28,44 @@ HorarioNegocio.belongsTo(Negocio, { foreignKey: 'id_negocio', as: 'negocio' });
 Usuario.hasMany(DisponibilidadEmpleado, { foreignKey: 'id_usuario', as: 'disponibilidades' });
 DisponibilidadEmpleado.belongsTo(Usuario, { foreignKey: 'id_usuario' });
 
+EmpleadoNegocio.hasMany(DisponibilidadEmpleado, { foreignKey: 'id_usuario', sourceKey: 'id_usuario', as: 'disponibilidades' });
+DisponibilidadEmpleado.belongsTo(EmpleadoNegocio, { foreignKey: 'id_usuario', targetKey: 'id_usuario', as: 'empleado' });
+
 // Asociación: Un Negocio tiene muchos Empleados
 Negocio.hasMany(EmpleadoNegocio, { foreignKey: 'id_negocio', as: 'empleados' });
 EmpleadoNegocio.belongsTo(Negocio, { foreignKey: 'id_negocio' });
+
+// Relación entre DuenoNegocio y Negocio
+DuenoNegocio.belongsTo(Negocio, { foreignKey: 'id_negocio', as: 'negocio' });
+Negocio.hasMany(DuenoNegocio, { foreignKey: 'id_negocio', as: 'duenosRelacion' });
 
 // Asociación: Un Usuario pertenece a muchos Negocios (Dueño a través de DuenoNegocio)
 Usuario.belongsToMany(Negocio, { through: DuenoNegocio, as: 'negocios', foreignKey: 'id_usuario' });
 Negocio.belongsToMany(Usuario, { through: DuenoNegocio, as: 'duenos', foreignKey: 'id_negocio' });
 
+// Asociacion para traer tabla empleados en reserva.
+Usuario.hasMany(EmpleadoNegocio, { foreignKey: 'id_usuario' });
+EmpleadoNegocio.belongsTo(Usuario, { foreignKey: 'id_usuario' });
+
 // Asociación: Un Servicio puede tener muchas Reservas
-Servicio.hasMany(Reserva, { foreignKey: 'id_servicio', as: 'reservas' });
-Reserva.belongsTo(Servicio, { foreignKey: 'id_servicio' });
+Servicio.hasMany(Reserva, { foreignKey: 'id_servicio', as: 'reservasServicio' });
+Reserva.belongsTo(Servicio, { foreignKey: 'id_servicio', as: 'servicio' });
 
 // Asociación: Un Cliente puede tener muchas Reservas (tabla Cliente)
-Cliente.hasMany(Reserva, { foreignKey: 'id_cliente', as: 'reservas' });
-Reserva.belongsTo(Cliente, { foreignKey: 'id_cliente' });
+Cliente.hasMany(Reserva, { foreignKey: 'id_cliente', as: 'reservasCliente' });
+Reserva.belongsTo(Cliente, { foreignKey: 'id_cliente', as: 'cliente' });
 
 // Asociación: Un Negocio tiene muchas Reservas
 Negocio.hasMany(Reserva, { foreignKey: 'id_negocio', as: 'reservas' });
 Reserva.belongsTo(Negocio, { foreignKey: 'id_negocio' });
 
 // Asociación: Un Empleado puede estar en muchas Reservas
-EmpleadoNegocio.hasMany(Reserva, { foreignKey: 'id_empleado', as: 'reservas' });
-Reserva.belongsTo(EmpleadoNegocio, { foreignKey: 'id_empleado' });
+EmpleadoNegocio.hasMany(Reserva, { foreignKey: 'id_empleado', as: 'reservasEmpleado' });
+Reserva.belongsTo(EmpleadoNegocio, { foreignKey: 'id_empleado', as: 'empleadoNegocio'  });
+
+// Asociación: Un Usuario puede tener muchas Reservas (si es empleado)
+Usuario.hasMany(Reserva, { foreignKey: 'id_empleado', as: 'reservasUsuario' });
+Reserva.belongsTo(Usuario, { foreignKey: 'id_empleado', as: 'empleadoUsuario' });
 
 // Asociación: Un Pago está asociado a una Reserva
 Reserva.hasOne(Pago, { foreignKey: 'id_reserva', as: 'pago' });

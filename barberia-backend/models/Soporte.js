@@ -31,6 +31,9 @@ Soporte.init(
       },
       onDelete: 'CASCADE',
     },
+    cargo: {
+      type: DataTypes.STRING(50),  
+    },
     asunto: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -42,7 +45,7 @@ Soporte.init(
     prioridad: {
       type: DataTypes.ENUM('baja', 'media', 'alta'),
       allowNull: false,
-      defaultValue: 'media', // Valor por defecto
+      defaultValue: 'media', 
     },
     estado: {
       type: DataTypes.ENUM('pendiente', 'en_progreso', 'resuelto'),

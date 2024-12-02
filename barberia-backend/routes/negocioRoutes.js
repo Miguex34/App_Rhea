@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Negocio = require('../models/Negocio');
-const { createNegocio, getAllNegocios, getNegocioById, updateNegocio, updateCategoria } = require('../controllers/negocioController');
+const { createNegocio, getAllNegocios, getNegocioById, updateNegocio, updateCategoria,obtenerNegociosCompletos, getNegocioByUserId  } = require('../controllers/negocioController');
 const authMiddleware = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 
 // Rutas para el negocio
+router.get('/completos', obtenerNegociosCompletos);
 router.post('/negocio', authMiddleware, createNegocio); // Crear negocio
 router.get('/negocios', authMiddleware, getAllNegocios); // Obtener todos los negocios
 router.get('/negocios/:id', authMiddleware, getNegocioById); // Obtener un negocio por ID
@@ -39,4 +40,8 @@ router.get('/:nombre', async (req, res) => {
     return res.status(500).json({ error: 'Error al obtener el negocio' });
   }
 });
+
+router.get('/usuario/negocio', authMiddleware, getNegocioByUserId);
+  
+
 module.exports = router;

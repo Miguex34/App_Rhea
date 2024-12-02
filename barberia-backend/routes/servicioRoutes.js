@@ -41,6 +41,7 @@ router.put(
 // Ruta para eliminar un servicio con autenticación
 router.delete('/:id', authMiddleware, servicioController.deleteServicio);
 
+router.get('/empleado/:id_empleado/servicios', authMiddleware,servicioController.getServiciosByEmpleado);
 
 
 // Ruta para obtener empleados asignados a un servicio específico

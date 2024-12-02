@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/database'); // Configuración de la base de 
 const bodyParser = require('body-parser');
-require('./models/associations'); // Asociaciones entre modelos
 const path = require('path');
+require('./models/associations'); // Asociaciones entre modelos
 
 // Importa tus modelos explícitamente
 const Usuario = require('./models/Usuario');
@@ -17,13 +17,11 @@ const EmpleadoNegocio = require('./models/EmpleadoNegocio');
 const Pago = require('./models/Pago');
 const Cliente = require('./models/Cliente');
 const Evento = require('./models/Evento');
-const transbankConfig = require('./config/transbankConfig.js');
 const EmpleadoServicio = require('./models/EmpleadoServicio.js');
 const Soporte = require('./models/Soporte');
-const authMiddleware = require('./middleware/authMiddleware');
-const transbankRoutes = require('./routes/transbankRoutes');
 
-// Importa tus rutas
+
+// Importamos las rutas
 const userRoutes = require('./routes/userRoutes');
 const negocioRoutes = require('./routes/negocioRoutes');
 const reservaRoutes = require('./routes/reservaRoutes');
@@ -32,8 +30,14 @@ const servicioRoutes = require('./routes/servicioRoutes');
 const pagoRoutes = require('./routes/pagoRoutes');
 const horarioRoutes = require('./routes/horarioRoutes');
 const disponibilidadEmpleadoRoutes = require('./routes/disponibilidadEmpleadoRoutes');
+const panelReservasRoutes = require('./routes/panelReservasRoutes');
+const authMiddleware = require('./middleware/authMiddleware');
 const eventoRoutes = require('./routes/eventoRoutes');
 const app = express();
+
+
+// Importa la ruta de reserva de horario
+const reservaHorarioRoutes = require('./routes/reservaHorarioRoutes');
 const proxyRoutes = require('./routes/proxyRoutes');
 const soporteRoutes = require('./routes/soporteRoutes');
 const clienteRoutes = require('./routes/clienteRoutes');
@@ -49,13 +53,22 @@ app.use('/api/reservas', reservaRoutes);
 app.use('/api/empleados', empleadoRoutes);
 app.use('/api/servicios', servicioRoutes);
 app.use('/api/pagos', pagoRoutes);
-app.use('/api/disponibilidadEmpleado', disponibilidadEmpleadoRoutes);
+app.use('/api/disponibilidad-empleado', disponibilidadEmpleadoRoutes);
 app.use('/api/horarios', horarioRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/eventos', eventoRoutes);
 app.use('/api/reservas', authMiddleware, reservaRoutes);
+
+// Registrar las rutas de reserva de horarios con el prefijo /api/reserva-horario
+app.use('/api/reserva-horario', reservaHorarioRoutes);
+
+// Rutas para el panel de reservas
+app.use('/api/panel-reservas', panelReservasRoutes);
+
+
+// Servir archivos estáticos desde la carpeta 'uploads'
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/soportes', soporteRoutes);
-app.use('/api/transbank', transbankRoutes);
 app.use('/api/clientes', clienteRoutes);
 app.use(proxyRoutes);
 

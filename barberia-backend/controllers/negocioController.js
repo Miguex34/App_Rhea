@@ -3,6 +3,7 @@ const  DuenoNegocio  = require('../models/DuenoNegocio'); // Tabla intermedia pa
 const EmpleadoNegocio = require('../models/EmpleadoNegocio');
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('../middleware/authMiddleware');
+const { Op } = require('sequelize');
 
 // Controlador para crear un nuevo negocio
 exports.createNegocio = async (req, res) => {
@@ -157,4 +158,54 @@ exports.updateCategoria = async (req, res) => {
   }
 };
 
+exports.obtenerNegociosCompletos = async (req, res) => {
+  try {
+    console.log('Iniciando consulta para obtener negocios completos...');
 
+    const negocios = await Negocio.findAll({
+      where: {
+        // Aseguramos que los campos esenciales no sean nulos ni vacíos
+        nombre: { [Op.ne]: '' },
+        telefono: { [Op.ne]: '' },
+        direccion: { [Op.ne]: '' },
+        correo: { [Op.ne]: '' },
+        descripcion: { [Op.ne]: '' },
+        categoria: { [Op.ne]: '' },
+        activo: true, // Solo negocios activos
+      },
+      attributes: ['id', 'nombre', 'telefono', 'direccion', 'correo', 'descripcion', 'categoria', 'activo'], // Campos necesarios
+    });
+
+    if (!negocios.length) {
+      console.log('No se encontraron negocios completos.');
+      return res.status(404).json({ message: 'No se encontraron negocios completos.' });
+    }
+
+    console.log('Negocios encontrados:', negocios);
+    res.status(200).json(negocios);
+  } catch (error) {
+    console.error('Error al obtener negocios completos:', error);
+    res.status(500).json({ message: 'Error interno al obtener negocios.', error: error.message });
+  }
+};
+
+exports.getNegocioByUserId = async (req, res) => {
+  try {
+    const { id } = req.user; // ID del usuario desde el token
+
+    // Buscar el negocio asociado al dueño
+    const relacion = await DuenoNegocio.findOne({
+      where: { id_usuario: id },
+      include: [{ model: Negocio, as: 'negocio' }], // Usa el alias definido
+    });
+
+    if (!relacion || !relacion.negocio) {
+      return res.status(404).json({ message: 'Negocio no encontrado para este usuario' });
+    }
+
+    res.status(200).json(relacion.negocio); // Devuelve el negocio asociado
+  } catch (error) {
+    console.error('Error al obtener el negocio por usuario:', error);
+    res.status(500).json({ error: 'Error interno al buscar negocio' });
+  }
+};

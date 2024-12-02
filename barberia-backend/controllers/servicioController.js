@@ -229,3 +229,48 @@ exports.getServiciosByNegocio = async (req, res) => {
     res.status(500).json({ error: 'Error al obtener los servicios' });
   }
 };
+
+exports.getServiciosByEmpleado = async (req, res) => {
+  try {
+    const { id_empleado } = req.params;
+
+    // Primero, buscar la relación del empleado con el negocio en la tabla empleado_negocio
+    const empleadoNegocio = await EmpleadoNegocio.findOne({
+      where: { id_usuario: id_empleado },
+    });
+
+    if (!empleadoNegocio) {
+      return res.status(404).json({ message: 'No se encontró un negocio asociado para este empleado' });
+    }
+
+    const negocioId = empleadoNegocio.id_negocio;
+
+    // Luego, obtener los servicios que están asociados al empleado y al negocio
+    const servicios = await Servicio.findAll({
+      include: [
+        {
+          model: Usuario,
+          as: 'empleados',
+          through: {
+            model: EmpleadoServicio,
+            attributes: [], // Omite atributos de la tabla intermedia
+          },
+          where: { id: id_empleado }, // Filtrar solo los servicios asignados al empleado logueado
+        },
+        {
+          model: Negocio,
+          where: { id: negocioId }, // Filtrar solo los servicios del negocio correspondiente
+        },
+      ],
+    });
+
+    if (!servicios || servicios.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron servicios para este empleado' });
+    }
+
+    res.json(servicios);
+  } catch (error) {
+    console.error('Error al obtener servicios asignados al empleado:', error);
+    res.status(500).json({ error: 'Error al obtener servicios asignados al empleado' });
+  }
+};

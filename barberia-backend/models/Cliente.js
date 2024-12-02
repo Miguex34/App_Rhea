@@ -13,7 +13,7 @@ const Cliente = sequelize.define('Cliente', {
   },
   apellido: {
     type: DataTypes.STRING(50),
-    allowNull: false,
+    allowNull: true,
   },
   email_cliente: {
     type: DataTypes.STRING(255),
@@ -22,14 +22,19 @@ const Cliente = sequelize.define('Cliente', {
   },
   password_cliente: {
     type: DataTypes.STRING(255),
-    allowNull: false,
+    allowNull: true,
   },
   celular_cliente: {
     type: DataTypes.NUMERIC(9),
-    allowNull: false,
+    allowNull: true,
   },
   comentario: {
     type: DataTypes.TEXT,
+  },
+  is_guest: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
   },
   token_recuperacion_cliente: {
     type: DataTypes.STRING(255),

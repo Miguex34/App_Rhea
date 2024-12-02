@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [userRole, setUserRole] = useState(null); // Para almacenar el cargo del usuario
   const location = useLocation();
 
   useEffect(() => {
@@ -16,10 +17,11 @@ const ProtectedRoute = ({ children }) => {
 
       try {
         // Validar el token haciendo una solicitud al backend
-        await axios.get('http://localhost:5000/api/users/me', {
+        const response = await axios.get('http://localhost:5000/api/users/me', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setIsAuthenticated(true);
+        setUserRole(response.data.cargo); // Obtén el cargo del usuario
       } catch (error) {
         console.error('Token inválido o sesión expirada:', error);
         localStorage.removeItem('token'); // Eliminar token si es inválido
@@ -35,12 +37,11 @@ const ProtectedRoute = ({ children }) => {
     return <div>Cargando...</div>;
   }
 
-  // Permitir acceso a la página de reserva sin autenticación
-  if (location.pathname.startsWith('/reserva')) {
-    return children;
+  // Verificar roles
+  if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
+    return <Navigate to="/login" replace />;
   }
 
-  // Redirigir al login si no está autenticado para otras rutas protegidas
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
