@@ -11,14 +11,14 @@ exports.createPago = async (req, res) => {
     if (!id_reserva || !monto || !metodo_pago) {
       return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
     }
-
+    const completadoUrl = `${process.env.BACKEND_URL}/api/pagos/completado`;
     // Crear una instancia de Transbank Webpay Plus Transaction
     const transaction = new transbank.WebpayPlus.Transaction();
     const response = await transaction.create(
-      'Tienda123', // Código del comercio de integración (por ejemplo: 597055555532)
+      'Tienda123', // Código del comercio de integración
       'Orden123',  // Número de orden única para el pago
       monto,       // Monto a pagar
-      'http://localhost:5000/api/pagos/completado' // URL donde se redirige al cliente después del pago
+      completadoUrl // URL dinámica donde se redirige al cliente después del pago
     );
 
     // Guardar el pago en la base de datos

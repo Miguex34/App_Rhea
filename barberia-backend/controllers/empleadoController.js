@@ -137,7 +137,7 @@ exports.crearEmpleado = async (req, res) => {
     );
 
     // Enviar correo con el token de registro
-    const verificationLink = `http://localhost:3000/registro/${token}`;
+    const verificationLink = `${process.env.FRONTEND_URL}/registro/${token}`;
     const emailContent = {
       link_registro: verificationLink, 
       nombre_negocio: negocio.nombre 
