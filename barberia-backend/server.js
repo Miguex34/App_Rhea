@@ -101,6 +101,13 @@ const syncDatabase = async () => {
   }
 };
 
+// Configuración para servir el frontend
+app.use(express.static(path.join(__dirname, '../barberia-frontend/build')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../barberia-frontend/build', 'index.html'));
+});
+
 // Iniciar la sincronización de la base de datos
 syncDatabase();
 
