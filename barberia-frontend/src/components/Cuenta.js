@@ -501,15 +501,10 @@ if (!descripcionRegex.test(descripcion)) {
       {/* Formulario para horario */}
       <form onSubmit={handleHorarioSubmit} className="bg-white p-6 rounded shadow-md space-y-6">
         <div>
-        <label className="block font-semibold mb-2">Horario de Apertura</label>
-        {Array.isArray(horarios) &&
-          horarios.length > 0 &&
-          horarios.map((dia, index) => (
+          <label className="block font-semibold mb-2">Horario de Apertura</label>
+          {Array.isArray(horarios) && horarios.length > 0 && horarios.map((dia, index) => (
             <div key={index} className="flex items-center space-x-4 mb-2">
-              {/* Mostrar el nombre del día */}
-              <span className="w-20 font-medium text-gray-700">{diasSemana[index]}</span>
-
-              {/* Input para la hora de apertura */}
+              <span className="w-20">{dia.dia}</span>
               <input
                 type="time"
                 name="desde"
@@ -526,16 +521,15 @@ if (!descripcionRegex.test(descripcion)) {
                 onChange={handleChange}
                 className="p-2 border rounded"
               />
-               <label className="flex items-center space-x-2">
+              <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   name="cerrado"
                   checked={dia.cerrado}
                   data-index={index}
                   onChange={handleChange}
-                  className="form-checkbox h-5 w-5 text-purple-500"
                 />
-                <span className="text-gray-700">{dia.cerrado ? 'Cerrado' : ''}</span>
+                <span>Cerrado</span>
               </label>
             </div>
           ))}
@@ -574,25 +568,37 @@ if (!descripcionRegex.test(descripcion)) {
           </h3>
           {disponibilidad.map((item, index) => (
             <div key={index} className="flex items-center space-x-4">
+              {/* Mostrar el nombre del día */}
+              <span className="w-24 font-medium text-gray-700">{diasSemana[index]}</span>
+
+              {/* TimePicker para hora de inicio */}
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                 <TimePicker
                   value={dayjs(item.hora_inicio, 'HH:mm:ss')}
                   onChange={(newValue) => handleDisponibilidadChange(newValue, index, 'hora_inicio')}
                   renderInput={(params) => <input {...params} className="border p-2 rounded" />}
                 />
+              </LocalizationProvider>
+
+              {/* TimePicker para hora de fin */}
+              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                 <TimePicker
                   value={dayjs(item.hora_fin, 'HH:mm:ss')}
                   onChange={(newValue) => handleDisponibilidadChange(newValue, index, 'hora_fin')}
                   renderInput={(params) => <input {...params} className="border p-2 rounded" />}
                 />
               </LocalizationProvider>
+
+              {/* Checkbox para marcar si está cerrado */}
               <input
                 type="checkbox"
                 checked={!item.disponible}
                 onChange={(e) => handleDisponibilidadChange(e.target.checked, index, 'disponible')}
                 className="form-checkbox h-5 w-5 text-purple-500"
               />
-              <span>{!item.disponible ? 'Cerrado' : ''}</span> {/* Mostrar texto "Cerrado" */}
+
+              {/* Mostrar siempre el texto "Cerrado" */}
+              <span className="text-gray-700">{!item.disponible ? 'Cerrado' : 'Abierto'}</span>
             </div>
           ))}
           <button
