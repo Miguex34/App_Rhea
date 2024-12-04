@@ -72,6 +72,19 @@ const Sidebar = () => {
           </li>
         )}
 
+        {/* Mostrar la opción "Profesionales" solo para 'Dueño' */}
+        {role === 'Dueño' && (
+          <li>
+            <Link
+              to="/profesionales"
+              className={`flex items-center space-x-3 p-2 px-4 rounded transition-colors duration-200 ${isActive('/profesionales') ? 'bg-purple-500' : 'hover:bg-gray-700'}`}
+            >
+              <FcManager />
+              {isMenuOpen && <span>Profesionales</span>}
+            </Link>
+          </li>
+        )}
+
         {/* Mostrar la opción "ServiciosEmp" solo para 'Empleado' */}
         {role === 'Empleado' && (
           <li>
@@ -80,7 +93,7 @@ const Sidebar = () => {
               className={`flex items-center space-x-3 p-2 px-4 rounded transition-colors duration-200 ${isActive('/ServiciosEmp') ? 'bg-purple-500' : 'hover:bg-gray-700'}`}
             >
               <FcInspection  />
-              {isMenuOpen && <span>Mis Servicios</span>}
+              {isMenuOpen && <span>Servicios Asignados</span>}
             </Link>
           </li>
         )}
@@ -94,16 +107,7 @@ const Sidebar = () => {
                 className={`flex items-center space-x-3 p-2 px-4 rounded transition-colors duration-200 ${isActive('/panel-reservas') ? 'bg-purple-500' : 'hover:bg-gray-700'}`}
               >
                 <FcPlanner />
-                {isMenuOpen && <span>Panel de Reservas</span>}
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/profesionales"
-                className={`flex items-center space-x-3 p-2 px-4 rounded transition-colors duration-200 ${isActive('/profesionales') ? 'bg-purple-500' : 'hover:bg-gray-700'}`}
-              >
-                <FcManager />
-                {isMenuOpen && <span>Profesionales</span>}
+                {isMenuOpen && <span>Mi Calendario de Reservas</span>}
               </Link>
             </li>
             <li>
@@ -133,7 +137,7 @@ const Sidebar = () => {
                 className={`flex items-center space-x-3 p-2 px-4 rounded transition-colors duration-200 ${isActive('/configuracion') ? 'bg-purple-500' : 'hover:bg-gray-700'}`}
               >
                 <FcAutomatic />
-                {isMenuOpen && <span>Configuración</span>}
+                {isMenuOpen && <span>Mi Configuración</span>}
               </Link>
             </li>
           </>

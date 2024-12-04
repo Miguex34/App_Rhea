@@ -174,7 +174,7 @@ const Configuracion = () => {
           <FcSupport className="text-4xl" /> {/* Icono de Soporte */}
         </div>
         <div>
-          <h3 className="text-lg font-medium text-gray-800">Soporte</h3>
+          <h3 className="text-lg font-medium text-gray-800">Enviar Ticket de Soporte</h3>
         </div>
       </Link>
 

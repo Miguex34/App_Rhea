@@ -39,11 +39,12 @@ const ServiciosEmp = () => {
 
   return (
     <div className="container mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-3xl font-bold mb-6 text-center text-blue-600">
-        {user ? `Bienvenido, ${user.nombre}` : 'Mis Servicios Asignados'}
-      </h2>
+      <h1 className="text-3xl font-bold mb-6 text-center text-purple-500">
+      {user ? `Bienvenido, ${user.nombre}` : 'Mis Servicios Asignados'}
+      </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-2">Mis Servicios Asignados</h2>
         {servicios.length > 0 ? (
           servicios.map((servicio) => (
             <div key={servicio.id} className="p-4 bg-gray-100 rounded-lg shadow-md">
