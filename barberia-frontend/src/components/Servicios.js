@@ -19,7 +19,7 @@ const Servicios = () => {
   const [empleados] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const navigate = useNavigate();
-  const [setUser] = useState({ nombre: '', correo: '', id_negocio: null });
+  const [user, setUser] = useState({ nombre: '', correo: '', id_negocio: null });
   const API_URL = process.env.REACT_APP_API_URL;
 
   const cargarServicios = useCallback(async (id_negocio) => {
@@ -60,8 +60,7 @@ const Servicios = () => {
       })
       .then((response) => {
         console.log('Usuario autenticado:', response.data);
-        setUser(response.data);
-
+        setUser(response.data); 
         const negocio = response.data.negocio;
         if (negocio && negocio.id) {
           console.log('Cargando datos para el negocio:', negocio.id);
@@ -79,6 +78,10 @@ const Servicios = () => {
         navigate('/login');
       });
   }, [navigate, API_URL, cargarServicios, cargarEmpleados,setUser]);
+
+  if (!user) {
+    return <p>Cargando...</p>; 
+  }
 
   // Manejar cambios en el formulario
   const handleChange = (e) => {

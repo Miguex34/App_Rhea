@@ -4,11 +4,7 @@ const EmpleadoNegocio = require('../models/EmpleadoNegocio');
 const EmpleadoServicio = require('../models/EmpleadoServicio');
 const Negocio = require('../models/Negocio');
 const Usuario = require('../models/Usuario');
-
-// servicioController.js
 const { validationResult } = require('express-validator');
-
-
 
 
 // Crear un nuevo servicio y asignar empleados
