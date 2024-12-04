@@ -29,6 +29,7 @@ const Servicios = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log('Servicios cargados:', response.data);
+      setServicios(response.data); // Actualiza el estado con los datos cargados
     } catch (error) {
       console.error('Error al cargar servicios:', error);
     }
