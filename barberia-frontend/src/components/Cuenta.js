@@ -299,7 +299,7 @@ if (!descripcionRegex.test(descripcion)) {
       }));
 
       const response = await axios.put(
-        `http://localhost:5000/api/horarios/negocio/${user.negocio.id}`,
+        `${API_URL}/api/horarios/negocio/${user.negocio.id}`,
         { horario: horariosFormateados },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -339,7 +339,7 @@ if (!descripcionRegex.test(descripcion)) {
       // Registrar como empleado
       try {
         const response = await axios.post(
-          `http://localhost:5000/api/users/registrar-empleado`,
+          `${API_URL}/api/users/registrar-empleado`,
           {
             id_usuario: user.id,
             id_negocio: user.negocio.id,
@@ -358,7 +358,7 @@ if (!descripcionRegex.test(descripcion)) {
       // Eliminar de empleado_negocio y disponibilidad_empleado
       try {
         const response = await axios.post(
-          `http://localhost:5000/api/users/eliminar-empleado`,
+          `${API_URL}/api/users/eliminar-empleado`,
           {
             id_usuario: user.id,
             id_negocio: user.negocio.id,
@@ -399,7 +399,7 @@ if (!descripcionRegex.test(descripcion)) {
   
       // Enviar solicitud al backend
       const response = await axios.post(
-        `http://localhost:5000/api/users/guardar-disponibilidad`,
+        `${API_URL}/api/users/guardar-disponibilidad`,
         {
           id_usuario: user.id,
           disponibilidad,

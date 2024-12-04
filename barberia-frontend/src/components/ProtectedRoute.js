@@ -5,7 +5,7 @@ import axios from 'axios';
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [userRole, setUserRole] = useState(null); // Para almacenar el cargo del usuario
-
+  const API_URL = process.env.REACT_APP_API_URL;
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
@@ -16,7 +16,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
       try {
         // Validar el token haciendo una solicitud al backend
-        const response = await axios.get('http://localhost:5000/api/users/me', {
+        const response = await axios.get(`${API_URL}/api/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setIsAuthenticated(true);
@@ -29,7 +29,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     };
 
     checkAuth();
-  }, []);
+  }, [API_URL]);
 
   // Mostrar nada mientras se verifica la autenticación
   if (isAuthenticated === null) {

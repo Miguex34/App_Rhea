@@ -4,6 +4,7 @@ import axios from 'axios';
 const ServiciosEmp = () => {
   const [servicios, setServicios] = useState([]);
   const [setUser] = useState(null);
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     // Verificar si el usuario tiene un token válido y obtener la información del usuario
@@ -26,7 +27,7 @@ const ServiciosEmp = () => {
 
   const cargarServiciosEmpleado = async (idEmpleado) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/servicios/empleado/${idEmpleado}/servicios`, {
+      const response = await axios.get(`${API_URL}/api/servicios/empleado/${idEmpleado}/servicios`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setServicios(response.data);

@@ -72,7 +72,7 @@ const Disponibilidad = () => {
         hora: selectedHorario.hora,
         cliente: clienteInfo,
       };
-      await axios.post('http://localhost:5000/api/reservas', reserva);
+      await axios.post(`${API_URL}/api/reservas`, reserva);
       alert('Reserva confirmada con éxito.');
       cerrarModalReserva();
     } catch (error) {
