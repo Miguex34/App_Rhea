@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import axios from 'axios';
 
 const ServiciosEmp = () => {
@@ -6,26 +6,8 @@ const ServiciosEmp = () => {
   const [setUser] = useState(null);
   const API_URL = process.env.REACT_APP_API_URL;
 
-  useEffect(() => {
-    // Verificar si el usuario tiene un token válido y obtener la información del usuario
-    const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.href = '/login';
-      return;
-    }
-
-    // Obtener el usuario desde el localStorage
-    const storedUser = JSON.parse(localStorage.getItem('usuario'));
-    if (storedUser && storedUser.cargo === 'Empleado') {
-      setUser(storedUser);
-      cargarServiciosEmpleado(storedUser.id);
-    } else {
-      console.warn("Usuario no autorizado o datos no encontrados.");
-      window.location.href = '/login';
-    }
-  }, [setUser]);
-
-  const cargarServiciosEmpleado = async (idEmpleado) => {
+  // Memorizar la función para que no cambie en cada renderizado
+  const cargarServiciosEmpleado = useCallback(async (idEmpleado) => {
     try {
       const response = await axios.get(`${API_URL}/api/servicios/empleado/${idEmpleado}/servicios`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
@@ -34,7 +16,26 @@ const ServiciosEmp = () => {
     } catch (error) {
       console.error('Error al cargar los servicios asignados al empleado:', error);
     }
-  };
+  }, [API_URL]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
+
+    const storedUser = JSON.parse(localStorage.getItem('usuario'));
+    if (storedUser && storedUser.cargo === 'Empleado') {
+      setUser(storedUser);
+      cargarServiciosEmpleado(storedUser.id); // La función ahora es estable
+    } else {
+      console.warn('Usuario no autorizado o datos no encontrados.');
+      window.location.href = '/login';
+    }
+  }, [cargarServiciosEmpleado,setUser]);
+
+  
 
   return (
     <div className="container mx-auto p-6 bg-white shadow-lg rounded-lg">
