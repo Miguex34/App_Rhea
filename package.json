@@ -1,23 +1,77 @@
 {
-  "name": "barberia-frontend",
+  "name": "barberia-fullstack",
   "version": "1.0.0",
+  "private": true,
+  "description": "Proyecto completo para barbería con frontend y backend",
+  "scripts": {
+    "start": "node barberia-backend/server.js",
+    "start:frontend": "npm start --prefix barberia-frontend",
+    "start:backend": "nodemon barberia-backend/server.js",
+    "build": "npm run build --prefix barberia-frontend",
+    "dev": "concurrently \"npm run start:frontend\" \"npm run start:backend\""
+  },
   "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.1.5",
+    "@mui/lab": "^6.0.0-beta.13",
+    "@mui/material": "^6.1.5",
+    "@mui/x-date-pickers": "^7.22.2",
+    "@sendgrid/mail": "^8.1.4",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "autoprefixer": "^10.4.20",
     "axios": "^1.7.7",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-validator": "^7.2.0",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
+    "moment-timezone": "^0.5.46",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.3",
+    "react": "^18.2.0",
+    "react-big-calendar": "^1.15.0",
+    "react-calendar": "^5.1.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.3.0",
+    "react-modal": "^3.16.1",
     "react-router-dom": "^6.27.0",
     "react-scripts": "^5.0.1",
-    "transbank-sdk": "^5.0.0"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "react-toastify": "^10.0.6",
+    "recharts": "^2.13.3",
+    "sequelize": "^6.37.3",
+    "tailwindcss": "^3.4.13",
+    "transbank-sdk": "^5.0.0",
+    "web-vitals": "^2.1.4"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.13"
+    "concurrently": "^8.2.0",
+    "nodemon": "^3.0.1",
+    "postcss": "^8.4.47"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
