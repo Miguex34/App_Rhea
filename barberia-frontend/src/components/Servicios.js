@@ -16,7 +16,7 @@ const Servicios = () => {
     id_negocio: null,
   });
   const [servicios, setServicios] = useState([]);
-  const [empleados] = useState([]);
+  const [empleados, setEmpleados] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const navigate = useNavigate();
   const [user, setUser] = useState({ nombre: '', correo: '', id_negocio: null });
@@ -41,10 +41,12 @@ const Servicios = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log('Empleados cargados:', response.data);
+      setEmpleados(response.data); // Guarda los empleados en el estado
     } catch (error) {
       console.error('Error al cargar empleados:', error);
     }
   }, [API_URL]);
+  
 
 
   useEffect(() => {
