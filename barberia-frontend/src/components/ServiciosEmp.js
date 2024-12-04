@@ -3,7 +3,6 @@ import axios from 'axios';
 
 const ServiciosEmp = () => {
   const [servicios, setServicios] = useState([]);
-  const [user, setUser] = useState(null);
   const API_URL = process.env.REACT_APP_API_URL;
 
   // Memorizar la función para que no cambie en cada renderizado
@@ -27,24 +26,22 @@ const ServiciosEmp = () => {
 
     const storedUser = JSON.parse(localStorage.getItem('usuario'));
     if (storedUser && storedUser.cargo === 'Empleado') {
-      setUser(storedUser);
-      cargarServiciosEmpleado(storedUser.id); // La función ahora es estable
+      cargarServiciosEmpleado(storedUser.id); 
     } else {
       console.warn('Usuario no autorizado o datos no encontrados.');
       window.location.href = '/login';
     }
-  }, [cargarServiciosEmpleado,setUser]);
+  }, [cargarServiciosEmpleado]);
 
   
 
   return (
     <div className="container mx-auto p-6 bg-white shadow-lg rounded-lg">
       <h1 className="text-3xl font-bold mb-6 text-center text-purple-500">
-      {user ? `Bienvenido, ${user.nombre}` : 'Mis Servicios Asignados'}
+      Mis Servicios Asignados
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-2">Mis Servicios Asignados</h2>
         {servicios.length > 0 ? (
           servicios.map((servicio) => (
             <div key={servicio.id} className="p-4 bg-gray-100 rounded-lg shadow-md">
