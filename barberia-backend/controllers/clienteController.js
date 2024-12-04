@@ -1,6 +1,6 @@
 const Cliente = require('../models/Cliente');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { Reserva, Servicio, Usuario, empleado } = require('../models/associations');
 const crearCuentaCliente = async (req, res) => {
     const { nombre, apellido, email_cliente, password_cliente, celular_cliente } = req.body;
