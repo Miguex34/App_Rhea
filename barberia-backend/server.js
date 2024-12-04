@@ -59,7 +59,6 @@ app.use('/api/servicios', servicioRoutes);
 app.use('/api/pagos', pagoRoutes);
 app.use('/api/disponibilidad-empleado', disponibilidadEmpleadoRoutes);
 app.use('/api/horarios', horarioRoutes);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/eventos', eventoRoutes);
 app.use('/api/reservas', authMiddleware, reservaRoutes);
 
@@ -71,7 +70,7 @@ app.use('/api/panel-reservas', panelReservasRoutes);
 
 
 // Servir archivos estáticos desde la carpeta 'uploads'
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static('/app/uploads'));
 app.use('/api/soportes', soporteRoutes);
 app.use('/api/clientes', clienteRoutes);
 app.use(proxyRoutes);
