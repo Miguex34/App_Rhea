@@ -17,7 +17,7 @@ const jwt = require('jsonwebtoken');
 const { sendEmailWithTemplateData }  = require('../utils/sendEmail');
 const crypto = require('crypto');
 
-// Funcion para obtener la disponibilidad de TODOS los empleados.
+// Función para obtener la disponibilidad de TODOS los empleados.
 exports.obtenerDisponibilidadGeneral = async (req, res) => {
     const { negocioId, servicioId } = req.params;
 
@@ -31,7 +31,7 @@ exports.obtenerDisponibilidadGeneral = async (req, res) => {
         }
 
         // Obtener información del servicio
-        const servicio = await Servicio.findByPk(servicioId, { attributes: ['id', 'nombre', 'duracion'] });
+        const servicio = await Servicio.findByPk(servicioId, { attributes: ['id', 'nombre', 'duracion', 'precio'] }); // Incluimos el campo precio
         if (!servicio) {
             return res.status(404).json({ message: 'Servicio no encontrado' });
         }
@@ -79,19 +79,19 @@ exports.obtenerDisponibilidadGeneral = async (req, res) => {
                         id_servicio: servicioId,         // Validamos el servicio especificado
                     },
                 });
-            
+
                 if (!empleadoServicio) {
                     // Saltar al siguiente empleado si no realiza el servicio
                     continue;
                 }
-            
+
                 const bloquesEmpleado = [];
                 let horaInicio = moment(`${fecha.format('YYYY-MM-DD')} ${empleado.hora_inicio}`);
                 const horaFin = moment(`${fecha.format('YYYY-MM-DD')} ${empleado.hora_fin}`);
-            
+
                 while (horaInicio.clone().add(duracionServicio, 'minutes').isSameOrBefore(horaFin)) {
                     const horaFinBloque = horaInicio.clone().add(duracionServicio, 'minutes');
-                    
+
                     // Verificar si la hora actual ya pasó en el día actual
                     if (fecha.isSame(moment(), 'day') && horaInicio.isBefore(moment())) {
                         horaInicio = horaFinBloque;
@@ -106,20 +106,20 @@ exports.obtenerDisponibilidadGeneral = async (req, res) => {
                             fecha: fecha.format('YYYY-MM-DD'),
                             hora_inicio: horaInicio.format('HH:mm:ss'),
                             hora_fin: horaFinBloque.format('HH:mm:ss'),
-                            estado: { [Op.ne]: 'CANCELADA' } // Excluir reservas canceladas
+                            estado: { [Op.notIn]: ['CANCELADA', 'RECHAZADO'] } // Excluir CANCELADA y RECHAZADO
                         }
                     });
-            
+
                     if (!reservaExistente) {
                         bloquesEmpleado.push({
                             hora_inicio: horaInicio.format('HH:mm'),
                             hora_fin: horaFinBloque.format('HH:mm'),
                         });
                     }
-            
+
                     horaInicio = horaFinBloque;
                 }
-            
+
                 // Solo incluimos empleados que tienen bloques disponibles
                 if (bloquesEmpleado.length > 0) {
                     bloquesPorEmpleado.push({
@@ -143,7 +143,7 @@ exports.obtenerDisponibilidadGeneral = async (req, res) => {
         // Respuesta final
         res.json({
             negocio,
-            servicio,
+            servicio, // Ahora incluye el precio
             diasDisponibles,
         });
     } catch (error) {
@@ -231,7 +231,7 @@ exports.obtenerDisponibilidadEmpleado = async (req, res) => {
                             fecha: fecha.format('YYYY-MM-DD'),
                             hora_inicio: horaInicio.format('HH:mm:ss'),
                             hora_fin: horaFinBloque.format('HH:mm:ss'),
-                            estado: { [Op.ne]: 'CANCELADA' } // Excluir reservas canceladas
+                            estado: { [Op.notIn]: ['CANCELADA', 'RECHAZADO'] } // Excluir CANCELADA y RECHAZADO
                         }
                     });
 

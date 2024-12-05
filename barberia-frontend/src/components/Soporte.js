@@ -208,6 +208,7 @@ const FormularioSoporte = () => {
                     <p><strong>Prioridad:</strong> {ticket.prioridad}</p>
                     <p><strong>Estado:</strong> {ticket.estado}</p>
                     <p><strong>Fecha de creación:</strong> {new Date(ticket.creado_en).toLocaleString()}</p>
+                    <p><strong>Respuesta:</strong> {ticket.respuesta}</p>
                     {ticket.imagen && (
                         <div className="mt-4">
                             <a
