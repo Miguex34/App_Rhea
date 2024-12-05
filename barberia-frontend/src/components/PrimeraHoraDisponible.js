@@ -16,6 +16,7 @@ const dividirEnFilas = (arr, tamanio) => {
 };
 
 const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
+    const API_URL = process.env.REACT_APP_API_URL;
     const [diasDisponibles, setDiasDisponibles] = useState([]);
     const [bloquesPorProfesional, setBloquesPorProfesional] = useState([]);
     const [diaSeleccionado, setDiaSeleccionado] = useState(null);
@@ -27,7 +28,7 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
     const [sinDisponibilidad, setSinDisponibilidad] = useState(false);
     const [servicioPrecio, setServicioPrecio] = useState(0);
     const navigate = useNavigate();
-    const API_URL = process.env.REACT_APP_API_URL;
+
     useEffect(() => {
         console.log('Inicializando PrimeraHoraDisponible...');
         console.log('Antes de limpiar:', sessionStorage);
@@ -42,9 +43,9 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
         }
 
         axios
-        .get(`${API_URL}/api/reserva-horario/disponibilidad/general/${negocioId}/${servicioId}`)
-        .then((response) => {
-          const { negocio, servicio, diasDisponibles } = response.data;
+            .get(`${API_URL}/api/reserva-horario/disponibilidad/general/${negocioId}/${servicioId}`)
+            .then((response) => {
+                const { negocio, servicio, diasDisponibles } = response.data;
                 setDiasDisponibles(diasDisponibles);
                 setNegocioNombre(negocio.nombre);
                 setServicioNombre(servicio.nombre);
@@ -59,7 +60,7 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
                 setError('Error al obtener disponibilidad: ' + error.message);
                 setLoading(false);
             });
-    }, [negocioId, servicioId,API_URL]);
+    }, [negocioId, servicioId, API_URL]);
 
     const handleDiaSeleccion = (date) => {
         const dia = moment(date).format('YYYY-MM-DD');

@@ -29,14 +29,95 @@ const MetodoPago = () => {
     };
 
     const handleSiguiente = () => {
-        // Guardar datos importantes en sessionStorage antes de abrir el modal
-        sessionStorage.setItem('empleadoSeleccionado', JSON.stringify(empleadoSeleccionado));
-        sessionStorage.setItem('bloqueSeleccionado', JSON.stringify(bloqueSeleccionado));
-        sessionStorage.setItem('reservaInvitado', JSON.stringify(reservaInvitado));
         if (!metodoPago) {
             alert('Por favor, selecciona un método de pago.');
             return;
         }
+    
+        if (metodoPago === 'transbank') {
+            handleSiguienteTransbank();
+        } else if (metodoPago === 'tienda') {
+            handleSiguienteTienda();
+        }
+    };
+
+    const handleSiguienteTransbank = async () => {
+        var response_reserva;
+        try {
+            const bloqueSeleccionado = JSON.parse(sessionStorage.getItem('bloqueSeleccionado'));
+            const negocioSeleccionado = JSON.parse(sessionStorage.getItem('negocioSeleccionado'));
+            const servicioSeleccionado = JSON.parse(sessionStorage.getItem('servicioSeleccionado'));
+        
+            setIsLoading(true); // Mostrar el loader
+        
+            if (!empleadoSeleccionado || !empleadoSeleccionado.empleadoId) {
+                alert('Hubo un problema al seleccionar al profesional. Por favor, regresa y selecciona un profesional válido.');
+                setIsLoading(false); // Ocultar loader si hay error temprano
+                return;
+            }
+        
+            try {
+                let clienteId = sessionStorage.getItem('clienteId'); // Cambiado a let
+                if (!clienteId && reservaInvitado) {
+                    // Crear cliente si es invitado
+                    const responseCliente = await axios.post(`${API_URL}/api/clientes/invitado`, {
+                        nombre: reservaInvitado.nombre,
+                        email: reservaInvitado.email,
+                        telefono: reservaInvitado.telefono || null,
+                        is_guest: true,
+                    });
+        
+                    clienteId = responseCliente.data.clienteId;
+                    sessionStorage.setItem('clienteId', clienteId);
+                    await new Promise((resolve) => setTimeout(resolve, 1000)); // Esperar 1 segundo
+                }
+        
+                // Crear reserva
+                response_reserva = await  axios.post(`${API_URL}/api/reserva-horario/crear`, {
+                    clienteId,
+                    negocioId: negocioSeleccionado.id,
+                    servicioId: servicioSeleccionado.id,
+                    empleadoId: bloqueSeleccionado.empleadoId, // Ajuste aquí
+                    empleadoNombre: bloqueSeleccionado.empleadoNombre,
+                    fecha: fechaSeleccionada,
+                    hora_inicio: bloqueSeleccionado.hora_inicio,
+                    hora_fin: bloqueSeleccionado.hora_fin,
+                    comentario_cliente: reservaInvitado?.comentario_cliente || null,
+                });
+
+                console.log('Respuesta de la reserva:', response_reserva.data);
+        
+                await new Promise((resolve) => setTimeout(resolve, 2000)); // Esperar 2 segundos
+            } catch (error) {
+                console.error('Error al confirmar la reserva:', error);
+                alert('Hubo un problema al confirmar tu reserva. Por favor, intenta de nuevo.');
+            } finally {
+                setIsLoading(false); // Ocultar el loader
+            }
+            //
+            const monto = servicioSeleccionado.precio; // Precio del servicio desde sessionStorage
+            const idReserva = response_reserva.data.reserva.id; // ID de la reserva desde la respuesta del backend
+            console.log('Datos enviados al backend:', { idReserva, monto });
+    
+            const response = await axios.post(`${API_URL}/api/pagos/iniciar`, {
+                idReserva,
+                monto,
+            });
+    
+            const { urlTransbank, token } = response.data;
+            sessionStorage.setItem('transbankToken', token); // Guardar el token para posibles referencias
+            window.location.href = `${urlTransbank}?token_ws=${token}`; // Redirigir al sitio de Transbank
+        } catch (error) {
+            console.error('Error al iniciar el pago con Transbank:', error);
+            alert('Hubo un problema al iniciar el pago. Intenta nuevamente.');
+        }
+    };
+
+    const handleSiguienteTienda = () => {
+        sessionStorage.setItem('empleadoSeleccionado', JSON.stringify(empleadoSeleccionado));
+        sessionStorage.setItem('bloqueSeleccionado', JSON.stringify(bloqueSeleccionado));
+        sessionStorage.setItem('reservaInvitado', JSON.stringify(reservaInvitado));
+    
         setIsModalOpen(true); // Abrir el modal
     };
 
@@ -63,8 +144,7 @@ const MetodoPago = () => {
                     email: reservaInvitado.email,
                     telefono: reservaInvitado.telefono || null,
                     is_guest: true,
-                  });
-                  
+                });
     
                 clienteId = responseCliente.data.clienteId;
                 sessionStorage.setItem('clienteId', clienteId);
@@ -77,6 +157,7 @@ const MetodoPago = () => {
                 negocioId: negocioSeleccionado.id,
                 servicioId: servicioSeleccionado.id,
                 empleadoId: bloqueSeleccionado.empleadoId, // Ajuste aquí
+                empleadoNombre: bloqueSeleccionado.empleadoNombre, // Nombre del empleado
                 fecha: fechaSeleccionada,
                 hora_inicio: bloqueSeleccionado.hora_inicio,
                 hora_fin: bloqueSeleccionado.hora_fin,
@@ -277,6 +358,7 @@ const MetodoPago = () => {
                 <div className="resumen-container">
                     <p><b>Negocio:</b> {negocioSeleccionado.nombre}</p>
                     <p><b>Servicio:</b> {servicioSeleccionado.nombre}</p>
+                    <p><b>Precio:</b> ${servicioSeleccionado.precio}</p>
                     <p><b>Profesional:</b> {empleadoSeleccionado.empleadoNombre}</p>
                     <p><b>Fecha:</b> {fechaSeleccionada}</p>
                     <p><b>Hora:</b> {bloqueSeleccionado.hora_inicio} - {bloqueSeleccionado.hora_fin}</p>
