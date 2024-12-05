@@ -46,7 +46,7 @@ const ConfirmacionReserva = () => {
         };
 
         verificarPago();
-    }, [token_ws]);
+    }, [token_ws, API_URL]);
 
     // Mostrar el loader mientras se verifica el estado
     if (isLoading) {

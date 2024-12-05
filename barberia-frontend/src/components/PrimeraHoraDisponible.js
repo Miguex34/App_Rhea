@@ -60,7 +60,7 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
                 setError('Error al obtener disponibilidad: ' + error.message);
                 setLoading(false);
             });
-    }, [negocioId, servicioId]);
+    }, [negocioId, servicioId, API_URL]);
 
     const handleDiaSeleccion = (date) => {
         const dia = moment(date).format('YYYY-MM-DD');
