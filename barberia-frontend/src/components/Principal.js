@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import "../styles/Principal.css"; // Archivo CSS personalizado
-import logo from "../assets/images/logo.png"; // Cambia al path real de tu logo
-import avionImage from "../assets/images/avion.png"; // Cambia al path real de tu imagen del avión
+import "../styles/Principal.css"; 
+import logo from "../assets/images/logo.png"; 
+import avionImage from "../assets/images/avion.png";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 

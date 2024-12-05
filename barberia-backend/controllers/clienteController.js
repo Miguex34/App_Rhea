@@ -1,56 +1,73 @@
 const Cliente = require('../models/Cliente');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { Reserva, Servicio, Usuario, empleado } = require('../models/associations');
+const { Reserva, Servicio, Usuario, Empleado } = require('../models/associations');
+
 const crearCuentaCliente = async (req, res) => {
-    const { nombre, apellido, email_cliente, password_cliente, celular_cliente } = req.body;
-  
-    try {
-      // Validar si el correo ya está en uso
-      const clienteExistente = await Cliente.findOne({ where: { email_cliente } });
-      if (clienteExistente) {
-        return res.status(400).json({ message: 'El correo ya está registrado.' });
+  const { nombre, apellido, email_cliente, password_cliente, celular_cliente, captchaToken } = req.body;
+
+  try {
+    // Verificar el token de Google reCAPTCHA
+    const captchaResponse = await axios.post(
+      `https://www.google.com/recaptcha/api/siteverify`,
+      null,
+      {
+        params: {
+          secret: process.env.RECAPTCHA_SECRET_KEY, // Clave secreta de reCAPTCHA
+          response: captchaToken, // Token enviado desde el frontend
+        },
       }
-  
-      // Generar un hash de la contraseña
-      const hashedPassword = await bcrypt.hash(password_cliente, 10);
-  
-      // Crear el cliente
-      const nuevoCliente = await Cliente.create({
-        nombre,
-        apellido,
-        email_cliente,
-        password_cliente: hashedPassword,
-        celular_cliente,
-      });
-  
-      // Generar el token JWT
-      const token = jwt.sign(
-        {
-          id: nuevoCliente.id,
-          email: nuevoCliente.email_cliente,
-          nombre: nuevoCliente.nombre,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: '1h' }
-      );
-  
-      res.status(201).json({
-        message: 'Cuenta creada exitosamente.',
-        cliente: {
-          id: nuevoCliente.id,
-          nombre: nuevoCliente.nombre,
-          apellido: nuevoCliente.apellido,
-          email_cliente: nuevoCliente.email_cliente,
-          celular_cliente: nuevoCliente.celular_cliente,
-        },
-        token,
-      });
-    } catch (error) {
-      console.error('Error al crear la cuenta del cliente:', error);
-      res.status(500).json({ message: 'Error al crear la cuenta del cliente.', error: error.message });
+    );
+
+    if (!captchaResponse.data.success) {
+      return res.status(400).json({ message: "Captcha inválido. Verificación fallida." });
     }
-  };
+
+    // Validar si el correo ya está en uso
+    const clienteExistente = await Cliente.findOne({ where: { email_cliente } });
+    if (clienteExistente) {
+      return res.status(400).json({ message: "El correo ya está registrado." });
+    }
+
+    // Generar un hash de la contraseña
+    const hashedPassword = await bcrypt.hash(password_cliente, 10);
+
+    // Crear el cliente
+    const nuevoCliente = await Cliente.create({
+      nombre,
+      apellido,
+      email_cliente,
+      password_cliente: hashedPassword,
+      celular_cliente,
+    });
+
+    // Generar el token JWT
+    const token = jwt.sign(
+      {
+        id: nuevoCliente.id,
+        email: nuevoCliente.email_cliente,
+        nombre: nuevoCliente.nombre,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(201).json({
+      message: "Cuenta creada exitosamente.",
+      cliente: {
+        id: nuevoCliente.id,
+        nombre: nuevoCliente.nombre,
+        apellido: nuevoCliente.apellido,
+        email_cliente: nuevoCliente.email_cliente,
+        celular_cliente: nuevoCliente.celular_cliente,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error("Error al crear la cuenta del cliente:", error);
+    res.status(500).json({ message: "Error al crear la cuenta del cliente.", error: error.message });
+  }
+};
 
   const loginCliente = async (req, res) => {
     const { correo, contraseña } = req.body;
@@ -235,6 +252,52 @@ const crearOActualizarCliente = async (req, res) => {
       res.status(500).json({ error: 'Error interno al manejar el cliente.' });
   }
 };
+const completarCuentaCliente = async (req, res) => {
+  const { email_cliente, password_cliente, confirmar_password, celular_cliente } = req.body;
+
+  try {
+    // Validar que el correo exista en la base de datos
+    const cliente = await Cliente.findOne({ where: { email_cliente, is_guest: true } });
+
+    if (!cliente) {
+      return res.status(404).json({ message: 'No se encontró un cliente invitado con este correo.' });
+    }
+
+    // Validar que las contraseñas coincidan
+    if (password_cliente !== confirmar_password) {
+      return res.status(400).json({ message: 'Las contraseñas no coinciden.' });
+    }
+
+    // Validar que el número de celular tenga exactamente 9 dígitos
+    if (!/^\d{9}$/.test(celular_cliente)) {
+      return res.status(400).json({ message: 'El número de celular debe contener exactamente 9 dígitos.' });
+    }
+
+    // Encriptar la nueva contraseña
+    const hashedPassword = await bcrypt.hash(password_cliente, 10);
+
+    // Actualizar los datos del cliente
+    cliente.password_cliente = hashedPassword;
+    cliente.celular_cliente = celular_cliente;
+    cliente.is_guest = false; // Cambiar el estado de invitado a cliente registrado
+
+    await cliente.save();
+
+    // Respuesta exitosa
+    return res.status(200).json({
+      message: 'Cuenta completada exitosamente.',
+      cliente: {
+        id: cliente.id,
+        nombre: cliente.nombre,
+        email_cliente: cliente.email_cliente,
+      },
+    });
+  } catch (error) {
+    console.error('Error al completar la cuenta del cliente:', error);
+    return res.status(500).json({ message: 'Error interno del servidor.', error: error.message });
+  }
+};
+
   
 
   module.exports = {
@@ -245,5 +308,5 @@ const crearOActualizarCliente = async (req, res) => {
     getCliente,
     updateCliente,
     obtenerHistorialReservas,
-
+    completarCuentaCliente,
   };

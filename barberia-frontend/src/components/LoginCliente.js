@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useState } from "react";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { verificarCorreo } from "../services/VerifyCorreo";
 
 const LoginForm = ({ closeModal, setAuth }) => {
-  const [formData, setFormData] = useState({ correo: '', contraseña: '' });
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({ correo: "", contraseña: "" });
+  const [error, setError] = useState(""); // Usar 'error' para manejar mensajes de error
   const API_URL = process.env.REACT_APP_API_URL;
 
   const handleInputChange = (e) => {
@@ -13,68 +14,74 @@ const LoginForm = ({ closeModal, setAuth }) => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const fetchUser = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.error('No se encontró el token en localStorage.');
-      return;
+  const verificarCorreoAntesLogin = async () => {
+    try {
+      const result = await verificarCorreo(API_URL, formData.correo);
+      if (result.registrado && result.is_guest) {
+        setError("El correo pertenece a un cliente invitado. Completa tu cuenta.");
+      } else {
+        setError(""); // Limpiar el mensaje de error si todo está bien
+      }
+    } catch (error) {
+      setError("Error al verificar el correo.");
     }
+  };
+
+  const fetchUser = async (token) => {
     try {
       const response = await axios.get(`${API_URL}/api/clientes/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (response.data) {
-        // Guarda los datos del cliente en localStorage
-        localStorage.setItem('user', JSON.stringify(response.data));
-        toast.success('¡Datos del usuario cargados correctamente!');
-      } else {
-        console.warn('La respuesta no contiene datos del cliente.');
+        localStorage.setItem("user", JSON.stringify(response.data));
+        toast.success("¡Datos del usuario cargados correctamente!");
       }
     } catch (error) {
-      console.error('Error al obtener datos del cliente:', error);
-      toast.error('No se pudieron cargar los datos del usuario.');
+      console.error("Error al obtener datos del cliente:", error);
+      toast.error("No se pudieron cargar los datos del usuario.");
     }
   };
-
-  
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (error) {
+      toast.error(error);
+      return;
+    }
+
     try {
       const response = await axios.post(`${API_URL}/api/clientes/loginc`, formData);
-      
-      // Guardar el token
       const token = response.data.token;
-      localStorage.setItem('token', token);
 
-      // Obtener datos del cliente inmediatamente
-      const userResponse = await axios.get(`${API_URL}/api/clientes/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      // Guardar los datos del cliente en localStorage
-      const user = userResponse.data;
-      localStorage.setItem('user', JSON.stringify(user));
-      await fetchUser();
+      // Guardar el token y datos del usuario
+      localStorage.setItem("token", token);
+      await fetchUser(token);
 
-      // Actualizar el estado de autenticación
+      // Actualizar estado de autenticación
       setAuth(true);
 
-      // Cerrar el modal
+      // Cerrar modal
       closeModal();
 
-      toast.success('¡Inicio de sesión exitoso!');
+      toast.success("¡Inicio de sesión exitoso!");
     } catch (error) {
-      console.error('Error al iniciar sesión:', error.response || error);
-      setError('Credenciales inválidas.');
-      toast.error('Error al iniciar sesión. Verifica tus credenciales.');
+      if (error.response?.data?.is_guest) {
+        toast.error("Este correo pertenece a un cliente invitado. Completa tu cuenta.");
+        window.location.href = `/completar-cuenta?email=${formData.correo}`; // Redirigir al completar cuenta
+      } else {
+        toast.error("Credenciales inválidas.");
+      }
     }
   };
-  
 
   return (
     <form onSubmit={handleLogin} className="bg-white p-6 rounded-md shadow-lg max-w-sm w-full">
-      {error && <p className="text-red-500">{error}</p>}
       <ToastContainer position="top-center" autoClose={5000} />
+
+      {error && <p className="text-red-500">{error}</p>}
+
       <div className="mb-4">
         <label className="block text-sm font-bold mb-2">Correo</label>
         <input
@@ -82,6 +89,7 @@ const LoginForm = ({ closeModal, setAuth }) => {
           name="correo"
           value={formData.correo}
           onChange={handleInputChange}
+          onBlur={verificarCorreoAntesLogin}
           className="border rounded w-full py-2 px-3"
           required
         />

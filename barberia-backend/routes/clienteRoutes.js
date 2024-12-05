@@ -10,5 +10,6 @@ router.post('/invitado', clienteController.crearOActualizarCliente);
 router.get('/me', authClienteMiddleware, clienteController.getCliente);
 router.put('/me', authClienteMiddleware, clienteController.updateCliente);
 router.get('/historial/:id_cliente', authClienteMiddleware, clienteController.obtenerHistorialReservas);
+router.put('/completar-cuenta', clienteController.completarCuentaCliente);
 
 module.exports = router;

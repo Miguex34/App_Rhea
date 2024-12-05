@@ -35,6 +35,7 @@ import Principal from './components/Principal';
 import Dashboard from './components/Dashboard';
 import CancelarReserva from './components/CancelarReserva';
 import Negocios from './components/Negocios';
+import CompletarCuenta from './components/CompletarCuenta';
 
 const AppContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
@@ -162,7 +163,7 @@ const AppContent = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/registro-cliente" element={<RegistroCliente />} />
           <Route path="/registro/:token" element={<RegistroEmpleado />} />
-
+          <Route path="/completar-cuenta" element={<CompletarCuenta />} />
           {/* Rutas privadas protegidas para Dueño */}
           <Route path="/cuenta" element={<ProtectedRoute allowedRoles={['Dueño']}><Cuenta /></ProtectedRoute>} />
 
