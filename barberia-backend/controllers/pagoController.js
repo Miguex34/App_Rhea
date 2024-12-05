@@ -1,134 +1,122 @@
+const { WebpayPlus,   } = require('transbank-sdk');
 const Pago = require('../models/Pago');
 const Reserva = require('../models/Reserva');
-const transbank = require('transbank-sdk'); // Asegúrate de tener configurado este paquete o SDK
+const crypto = require('crypto');
 
-// Crear un pago
-exports.createPago = async (req, res) => {
+// Configuración de Transbank
+const webpay = new WebpayPlus.Transaction();
+
+exports.iniciarTransaccion = async (req, res) => {
   try {
-    const { id_reserva, monto, metodo_pago } = req.body;
+    const { idReserva, monto } = req.body;
 
-    // Validación simple
-    if (!id_reserva || !monto || !metodo_pago) {
-      return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+    if (!idReserva || !monto) {
+      return res.status(400).json({ error: 'idReserva y monto son requeridos.' });
     }
-    const completadoUrl = `${process.env.BACKEND_URL}/api/pagos/completado`;
-    // Crear una instancia de Transbank Webpay Plus Transaction
-    const transaction = new transbank.WebpayPlus.Transaction();
-    const response = await transaction.create(
-      'Tienda123', // Código del comercio de integración
-      'Orden123',  // Número de orden única para el pago
-      monto,       // Monto a pagar
-      completadoUrl // URL dinámica donde se redirige al cliente después del pago
-    );
 
-    // Guardar el pago en la base de datos
-    const pago = await Pago.create({
-      id_reserva,
-      monto,
-      metodo_pago,
-      fecha: new Date(),
-      estado: 'Pendiente', // Estado inicial del pago
-      codigo_transaccion: response.token, // Guardamos el token de Transbank
+    // Usa idReserva directamente como buyOrder
+    const buyOrder = idReserva;
+
+    console.log(`Iniciando transacción con:\nidReserva: ${idReserva}\nmonto: ${monto}\nbuyOrder: ${buyOrder}`);
+
+    // Crear la transacción en Transbank
+    const response = await webpay.create(
+      buyOrder.toString(), // ID único como "orden de compra"
+      "1", // session id
+      monto, // Monto total a pagar
+      //"http://localhost:5000/api/pagos/confirmacion"//, // URL de confirmación en el backend
+      "https://apprhea-production.up.railway.app/confirmacion",  //URL de retorno al frontend
+      
+      
+    );
+    console.log('Respuesta de Transbank:', response);
+    res.json({
+      urlTransbank: response.url,
+      token: response.token,
     });
 
-    res.status(201).json({ message: 'Pago creado con éxito', pago, url: response.url });
   } catch (error) {
-    console.error('Error al crear el pago:', error);
-    res.status(500).json({ message: 'Error al crear el pago', error });
+    console.error('Error al iniciar la transacción:', error.message);
+    res.status(500).json({ error: 'Error al iniciar la transacción.' });
   }
 };
 
-// Completar el pago después de la respuesta de Transbank
-exports.completePago = async (req, res) => {
+exports.confirmarPago = async (req, res) => {
   try {
-    const token = req.body.token_ws;
+    console.log("req.querytoken_ws",req.query.token_ws);
+    const { token_ws } = req.query; // Transbank envía el token como query param
+    console.log("1");
+    // Consultar el estado de la transacción
+    console.log("token_ws",token_ws);
+    var response;
+    try {
+      response = await webpay.commit(token_ws);
+    } catch (error) {
+      console.error('error en commit:', error.message);
+      res.status(200).json({ 'error': 'Error al confirmar el pago.' });
+      return;
+    }  
+    console.log("2");
 
-    // Crear una instancia de Transbank Webpay Plus Transaction
-    const transaction = new transbank.WebpayPlus.Transaction();
-    const response = await transaction.commit(token);
+    // Verificar si ya existe un pago para este `buy_order`
+    const existingPago = await Pago.findOne({ where: { id_reserva: response.buy_order } });
 
-    // Actualizar el pago en la base de datos
-    const pago = await Pago.findOne({ where: { codigo_transaccion: token } });
-
-    if (!pago) {
-      return res.status(404).json({ message: 'Pago no encontrado' });
+    if (existingPago) {
+      console.log(`Pago ya procesado para buy_order: ${response.buy_order}`);
+      return res.status(200).json({
+        mensaje: 'Pago ya procesado.',
+        estado: existingPago.estado,
+      });
     }
 
-    pago.estado = response.status === 'AUTHORIZED' ? 'Completado' : 'Rechazado';
-    await pago.save();
-
-    res.status(200).json({ message: 'Pago completado', pago });
-  } catch (error) {
-    console.error('Error al completar el pago:', error);
-    res.status(500).json({ message: 'Error al completar el pago', error });
-  }
-};
-
-// Obtener todos los pagos
-exports.getPagos = async (req, res) => {
-  try {
-    const pagos = await Pago.findAll();
-    res.status(200).json(pagos);
-  } catch (error) {
-    console.error('Error al obtener los pagos:', error);
-    res.status(500).json({ message: 'Error al obtener los pagos', error });
-  }
-};
-
-// Obtener un pago por ID
-exports.getPagoById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const pago = await Pago.findByPk(id);
-
-    if (!pago) {
-      return res.status(404).json({ message: 'Pago no encontrado' });
+    if (response.status === 'AUTHORIZED') {
+      console.log("3");
+      // Actualizar el estado del pago en la base de datos
+      const pago = await Pago.create({
+        id_reserva: response.buy_order,
+        monto: response.amount,
+        fecha: new Date(),
+        metodo_pago: 'Webpay Plus',
+        estado: 'CONFIRMADA',
+        codigo_transaccion: response.authorization_code,
+      });
+      console.log("4");
+      // Actualizar la reserva
+      await Reserva.update(
+        { id_pago: pago.id, estado: 'CONFIRMADA' },
+        { where: { id: response.buy_order } }
+      );
+      console.log("5");
+      res.json({ mensaje: 'Pago aprobado', detalles: response });
+    } else {
+      // Actualizar el estado del pago en la base de datos
+      const pago = await Pago.create({
+        id_reserva: response.buy_order,
+        monto: response.amount,
+        fecha: new Date(),
+        metodo_pago: 'Webpay Plus',
+        estado: 'RECHAZADO',
+        codigo_transaccion: response.authorization_code,
+      });
+      // Actualizar la reserva
+      await Reserva.update(
+        { id_pago: pago.id, estado: 'RECHAZADO' },
+        { where: { id: response.buy_order } }
+      );
+      res.status(200).json({ "error": 'El pago fue rechazado.', detalles: response });
     }
-
-    res.status(200).json(pago);
   } catch (error) {
-    console.error('Error al obtener el pago:', error);
-    res.status(500).json({ message: 'Error al obtener el pago', error });
+    console.error('Error al confirmar el pago:', error.message);
+    res.status(200).json({ "error": 'Error al confirmar el pago.' });
   }
 };
 
-// Actualizar un pago
-exports.updatePago = async (req, res) => {
+exports.finalizarPago = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { monto, metodo_pago, estado } = req.body;
-
-    const pago = await Pago.findByPk(id);
-    if (!pago) {
-      return res.status(404).json({ message: 'Pago no encontrado' });
-    }
-
-    pago.monto = monto || pago.monto;
-    pago.metodo_pago = metodo_pago || pago.metodo_pago;
-    pago.estado = estado || pago.estado;
-
-    await pago.save();
-    res.status(200).json({ message: 'Pago actualizado con éxito', pago });
+    const { token_ws } = req.query;
+    res.redirect(`/metodoPago?status=finalizado&token=${token_ws}`);
   } catch (error) {
-    console.error('Error al actualizar el pago:', error);
-    res.status(500).json({ message: 'Error al actualizar el pago', error });
-  }
-};
-
-// Eliminar un pago
-exports.deletePago = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const pago = await Pago.findByPk(id);
-
-    if (!pago) {
-      return res.status(404).json({ message: 'Pago no encontrado' });
-    }
-
-    await pago.destroy();
-    res.status(200).json({ message: 'Pago eliminado con éxito' });
-  } catch (error) {
-    console.error('Error al eliminar el pago:', error);
-    res.status(500).json({ message: 'Error al eliminar el pago', error });
+    console.error('Error en la finalización del pago:', error.message);
+    res.status(500).send('Error en la finalización del pago.');
   }
 };

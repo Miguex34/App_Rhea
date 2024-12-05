@@ -16,6 +16,12 @@
     font-weight: bold;
 }
 
+.confirmacion-titulo-rechazo {
+    font-size: 1.8rem;
+    color: #c00000;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
 .confirmacion-detalles {
     text-align: left;
     margin-top: 20px;
