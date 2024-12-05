@@ -25,6 +25,7 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
     const [negocioNombre, setNegocioNombre] = useState('');
     const [servicioNombre, setServicioNombre] = useState('');
     const [sinDisponibilidad, setSinDisponibilidad] = useState(false);
+    const [servicioPrecio, setServicioPrecio] = useState(0);
     const navigate = useNavigate();
     const API_URL = process.env.REACT_APP_API_URL;
     useEffect(() => {
@@ -47,6 +48,7 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
                 setDiasDisponibles(diasDisponibles);
                 setNegocioNombre(negocio.nombre);
                 setServicioNombre(servicio.nombre);
+                setServicioPrecio(servicio.precio);
                 // Verifica si todos los días están no disponibles
                 const hayDiasDisponibles = diasDisponibles.some((dia) => dia.disponible);
                 setSinDisponibilidad(!hayDiasDisponibles); // Si no hay días disponibles, cambia el estado a true
@@ -102,7 +104,7 @@ const PrimeraHoraDisponible = ({ negocioId, servicioId }) => {
             );
             sessionStorage.setItem(
                 'servicioSeleccionado',
-                JSON.stringify({ id: servicioId, nombre: servicioNombre })
+                JSON.stringify({ id: servicioId, nombre: servicioNombre, precio: servicioPrecio })
             );
             sessionStorage.setItem('bloqueSeleccionado', JSON.stringify(bloqueSeleccionado));
             sessionStorage.setItem('fechaSeleccionada', diaSeleccionado);

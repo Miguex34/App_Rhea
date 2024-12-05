@@ -13,7 +13,7 @@ const ProfesionalEspecifico = ({ negocioId, servicioId }) => {
     const [negocioNombre, setNegocioNombre] = useState('');
     const [servicioNombre, setServicioNombre] = useState('');
     // eslint-disable-next-line no-unused-vars
-    const [setLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const API_URL = process.env.REACT_APP_API_URL;
 
@@ -29,8 +29,7 @@ const ProfesionalEspecifico = ({ negocioId, servicioId }) => {
                     `${API_URL}/api/reserva-horario/disponibilidad/general/${negocioId}/${servicioId}`
                   );
                   
-                  // Obtener disponibilidad por empleados
-                  const empleadosResponse = await axios.get(
+                const empleadosResponse = await axios.get(
                     `${API_URL}/api/reserva-horario/disponibilidad/empleados/${negocioId}/${servicioId}`
                   );
 
