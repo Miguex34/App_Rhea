@@ -487,6 +487,7 @@ exports.crearReserva = async (req, res) => {
         negocioId,
         servicioId,
         empleadoId, // Recibido desde el frontend
+        empleadoNombre,
         fecha,
         hora_inicio,
         hora_fin,
@@ -501,21 +502,9 @@ exports.crearReserva = async (req, res) => {
                 dataRecibida: req.body, // Para depuración
             });
         }
-
-        // Buscar el id_usuario correspondiente al id_empleado
-        const empleadoNegocio = await EmpleadoNegocio.findOne({
-            where: { id: empleadoId, id_negocio: negocioId },
-            include: [{ model: Usuario, attributes: ['nombre'] }], // Incluye el modelo Usuario
-        });
-
-        if (!empleadoNegocio) {
-            return res.status(404).json({
-                message: 'No se encontró el empleado asociado al negocio proporcionado.',
-            });
-        }
-
-        const id_usuario = empleadoNegocio.id_usuario; // Extraer el id_usuario
-        const nombre_profesional = empleadoNegocio?.Usuario?.nombre || 'Profesional no especificado';
+        
+        // Asignar id_usuario igual al empleadoId
+        const id_usuario = empleadoId;
         
         // Buscar información del negocio
         const negocio = await Negocio.findByPk(negocioId, {
@@ -547,7 +536,7 @@ exports.crearReserva = async (req, res) => {
             id_cliente: clienteId,
             id_negocio: negocioId,
             id_servicio: servicioId,
-            id_usuario, // Usamos el id_usuario obtenido
+            id_usuario:empleadoId, // Usamos el id_usuario obtenido
             id_empleado: empleadoId, // Guardamos también el id_empleado para trazabilidad
             fecha,
             hora_inicio,
@@ -574,7 +563,7 @@ exports.crearReserva = async (req, res) => {
                     numero_reserva: nuevaReserva.id,
                     negocio: negocio.nombre, // Nombre del negocio
                     servicio: servicio.nombre, // Nombre del servicio
-                    profesional: nombre_profesional, // Nombre del profesional
+                    profesional: empleadoNombre, // Nombre del profesional
                     fecha, // Fecha de la reserva
                     hora_inicio, // Hora de inicio
                     hora_fin, // Hora de fin

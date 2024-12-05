@@ -78,6 +78,7 @@ const MetodoPago = () => {
                     negocioId: negocioSeleccionado.id,
                     servicioId: servicioSeleccionado.id,
                     empleadoId: bloqueSeleccionado.empleadoId, // Ajuste aquí
+                    empleadoNombre: bloqueSeleccionado.empleadoNombre,
                     fecha: fechaSeleccionada,
                     hora_inicio: bloqueSeleccionado.hora_inicio,
                     hora_fin: bloqueSeleccionado.hora_fin,
@@ -156,6 +157,7 @@ const MetodoPago = () => {
                 negocioId: negocioSeleccionado.id,
                 servicioId: servicioSeleccionado.id,
                 empleadoId: bloqueSeleccionado.empleadoId, // Ajuste aquí
+                empleadoNombre: bloqueSeleccionado.empleadoNombre, // Nombre del empleado
                 fecha: fechaSeleccionada,
                 hora_inicio: bloqueSeleccionado.hora_inicio,
                 hora_fin: bloqueSeleccionado.hora_fin,
