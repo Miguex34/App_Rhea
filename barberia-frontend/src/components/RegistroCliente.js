@@ -3,7 +3,7 @@ import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai"; // Importar icono de cerrar
 import { toast } from "react-toastify"; // Importar toast para notificaciones
 import { verificarCorreo } from "../services/VerifyCorreo";
-import ReCAPTCHA from "react-google-recaptcha";
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const RegistroCliente = ({ closeModal, setAuth }) => {
   const [formData, setFormData] = useState({
