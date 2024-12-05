@@ -167,7 +167,7 @@ exports.obtenerDisponibilidadEmpleado = async (req, res) => {
 
         // Obtener datos del servicio
         const servicio = await Servicio.findByPk(servicioId, {
-            attributes: ['id', 'nombre', 'duracion']
+            attributes: ['id', 'nombre', 'duracion', 'precio']
         });
         if (!servicio) {
             return res.status(404).json({ message: 'Servicio no encontrado' });
@@ -261,7 +261,8 @@ exports.obtenerDisponibilidadEmpleado = async (req, res) => {
             servicio: {
                 id: servicio.id,
                 nombre: servicio.nombre,
-                duracion: servicio.duracion
+                duracion: servicio.duracion,
+                precio: servicio.precio
             },
             diasDisponibles
         });
