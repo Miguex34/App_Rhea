@@ -578,7 +578,7 @@ exports.crearReserva = async (req, res) => {
                     fecha, // Fecha de la reserva
                     hora_inicio, // Hora de inicio
                     hora_fin, // Hora de fin
-                    enlace_cancelacion: `http://localhost:3000/cancelar-reserva/${cancelacionToken}`
+                    enlace_cancelacion: `https://apprhea-production.up.railway.app/cancelar-reserva/${cancelacionToken}`
                 });
             } catch (error) {
                 console.error('Error al enviar el correo:', error.message);
