@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { AiOutlineClose } from "react-icons/ai"; // Importar icono de cerrar
-import { toast } from "react-toastify"; // Importar toast para notificaciones
+import { AiOutlineClose } from "react-icons/ai"; // Icono de cerrar
+import { toast } from "react-toastify"; // Notificaciones
 import { verificarCorreo } from "../services/VerifyCorreo";
 
 const RegistroCliente = ({ closeModal, setAuth }) => {
@@ -18,15 +18,19 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
   const [emailError, setEmailError] = useState(""); // Manejo del error de correo
   const API_URL = process.env.REACT_APP_API_URL;
 
+  // Hacer handleCaptchaChange accesible globalmente
+  useEffect(() => {
+    window.handleCaptchaChange = (token) => {
+      setCaptchaToken(token);
+    };
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
       [name]: value,
     });
-  };
-  const handleCaptchaChange = (token) => {
-    setCaptchaToken(token);
   };
 
   const verificarCorreoExistente = async () => {
@@ -59,13 +63,17 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
       toast.error("El número de celular debe contener exactamente 9 dígitos.");
       return;
     }
+
     if (!captchaToken) {
       toast.error("Por favor, verifica que no eres un robot.");
       return;
     }
 
     try {
-      const response = await axios.post(`${API_URL}/api/clientes/register`, formData,captchaToken,);
+      const response = await axios.post(`${API_URL}/api/clientes/register`, {
+        ...formData,
+        captchaToken,
+      });
       localStorage.setItem("token", response.data.token);
       setAuth(true);
       closeModal();
@@ -167,12 +175,14 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
         />
         <span>Celular</span>
       </label>
-       {/* Captcha */}
-       <div
+
+      {/* Captcha */}
+      <div
         className="h-captcha"
         data-sitekey="40f08a70-5eb4-4392-a966-e2ee316281f2"
         data-callback="handleCaptchaChange"
       ></div>
+
       <button type="submit" className="submit bg-purple-700 hover:bg-purple-800">
         Registrar
       </button>

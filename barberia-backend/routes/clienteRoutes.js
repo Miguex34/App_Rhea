@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 const clienteController = require('../controllers/clienteController');
 const authClienteMiddleware = require('../middleware/authClienteMiddleware'); //Importamos el middleware de autenticación
-const { verificarCaptcha } = require("./path/to/clienteController");
 
-router.post("/register", verificarCaptcha, ...clienteController.crearCuentaCliente);
+router.post("/register", clienteController.crearCuentaCliente);
 router.post('/loginc', clienteController.loginCliente);
 router.get('/verificar-correo', clienteController.verificarCorreo);
 router.post('/invitado', clienteController.crearOActualizarCliente);
