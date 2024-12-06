@@ -15,35 +15,47 @@ const CompletarCuenta = () => {
     confirmar_password: "",
   });
 
+  const [errors, setErrors] = useState({}); // Para manejar errores visuales
+  const [negocioSeleccionado, setNegocioSeleccionado] = useState("");
+
   useEffect(() => {
     // Verifica que el negocio seleccionado esté almacenado en el sessionStorage
-    if (!sessionStorage.getItem("negocioSeleccionado")) {
+    const negocio = sessionStorage.getItem("negocioSeleccionado");
+    if (!negocio) {
       toast.error("No se encontró un negocio seleccionado.");
+    } else {
+      setNegocioSeleccionado(negocio);
     }
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validar campos
+    const validationErrors = {};
+
     if (formData.password_cliente.length < 8) {
-      toast.error("La contraseña debe tener al menos 8 caracteres.");
-      return;
+      validationErrors.password_cliente = "La contraseña debe tener al menos 8 caracteres.";
     }
 
     if (formData.password_cliente !== formData.confirmar_password) {
-      toast.error("Las contraseñas no coinciden.");
-      return;
+      validationErrors.confirmar_password = "Las contraseñas no coinciden.";
     }
 
     if (!/^\d{9}$/.test(formData.celular_cliente)) {
-      toast.error("El número de celular debe tener exactamente 9 dígitos.");
+      validationErrors.celular_cliente = "El número de celular debe tener exactamente 9 dígitos.";
+    }
+
+    // Si hay errores, actualizamos el estado y mostramos los errores
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
     try {
+      // Petición al backend
       await axios.put(`${process.env.REACT_APP_API_URL}/api/clientes/completar-cuenta`, formData);
       toast.success("Cuenta completada exitosamente.");
-      const negocioSeleccionado = sessionStorage.getItem("negocioSeleccionado");
       navigate(`/negocio/${negocioSeleccionado}`);
     } catch (error) {
       toast.error(error.response?.data?.message || "Ocurrió un error.");
@@ -117,8 +129,13 @@ const CompletarCuenta = () => {
                   setFormData({ ...formData, celular_cliente: e.target.value })
                 }
                 required
-                className="w-full p-3 pl-10 border border-gray-300 rounded-md"
+                className={`w-full p-3 pl-10 border border-gray-300 rounded-md ${
+                  errors.celular_cliente ? "border-red-500" : ""
+                }`}
               />
+              {errors.celular_cliente && (
+                <p className="text-red-500 text-sm mt-1">{errors.celular_cliente}</p>
+              )}
             </div>
           </div>
 
@@ -136,8 +153,13 @@ const CompletarCuenta = () => {
                   setFormData({ ...formData, password_cliente: e.target.value })
                 }
                 required
-                className="w-full p-3 pl-10 border border-gray-300 rounded-md"
+                className={`w-full p-3 pl-10 border border-gray-300 rounded-md ${
+                  errors.password_cliente ? "border-red-500" : ""
+                }`}
               />
+              {errors.password_cliente && (
+                <p className="text-red-500 text-sm mt-1">{errors.password_cliente}</p>
+              )}
             </div>
           </div>
 
@@ -155,8 +177,13 @@ const CompletarCuenta = () => {
                   setFormData({ ...formData, confirmar_password: e.target.value })
                 }
                 required
-                className="w-full p-3 pl-10 border border-gray-300 rounded-md"
+                className={`w-full p-3 pl-10 border border-gray-300 rounded-md ${
+                  errors.confirmar_password ? "border-red-500" : ""
+                }`}
               />
+              {errors.confirmar_password && (
+                <p className="text-red-500 text-sm mt-1">{errors.confirmar_password}</p>
+              )}
             </div>
           </div>
 
@@ -174,4 +201,3 @@ const CompletarCuenta = () => {
 };
 
 export default CompletarCuenta;
-
