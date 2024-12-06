@@ -7,18 +7,28 @@ const axios = require('axios');
 const crearCuentaCliente = async (req, res) => {
   const { nombre, apellido, email_cliente, password_cliente, celular_cliente, captchaToken } = req.body;
 
+  if (!captchaToken) {
+    return res.status(400).json({ message: "Captcha no proporcionado." });
+  }
+
   try {
     // Verificar el token de Google reCAPTCHA
-    const captchaResponse = await axios.post(
-      `https://www.google.com/recaptcha/api/siteverify`,
+    const response = await axios.post(
+      "https://hcaptcha.com/siteverify",
       null,
       {
         params: {
-          secret: process.env.RECAPTCHA_SECRET_KEY, // Clave secreta de reCAPTCHA
-          response: captchaToken, // Token enviado desde el frontend
+          secret: process.env.HCAPTCHA_SECRET_KEY,
+          response: captchaToken,
         },
       }
     );
+
+    if (!response.data.success) {
+      return res.status(400).json({
+        message: "Captcha inválido. Verificación fallida.",
+      });
+    }
 
     if (!captchaResponse.data.success) {
       return res.status(400).json({ message: "Captcha inválido. Verificación fallida." });

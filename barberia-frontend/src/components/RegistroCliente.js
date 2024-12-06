@@ -3,7 +3,6 @@ import axios from "axios";
 import { AiOutlineClose } from "react-icons/ai"; // Importar icono de cerrar
 import { toast } from "react-toastify"; // Importar toast para notificaciones
 import { verificarCorreo } from "../services/VerifyCorreo";
-import ReCAPTCHA from 'react-google-recaptcha';
 
 const RegistroCliente = ({ closeModal, setAuth }) => {
   const [formData, setFormData] = useState({
@@ -27,7 +26,7 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
     });
   };
   const handleCaptchaChange = (token) => {
-    setCaptchaToken(token); // Guardar el token generado por el captcha
+    setCaptchaToken(token);
   };
 
   const verificarCorreoExistente = async () => {
@@ -169,10 +168,11 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
         <span>Celular</span>
       </label>
        {/* Captcha */}
-       <ReCAPTCHA
-        sitekey="TU_SITE_KEY" // Sustituir con tu Site Key
-        onChange={handleCaptchaChange}
-      />
+       <div
+        className="h-captcha"
+        data-sitekey="40f08a70-5eb4-4392-a966-e2ee316281f2"
+        data-callback="handleCaptchaChange"
+      ></div>
       <button type="submit" className="submit bg-purple-700 hover:bg-purple-800">
         Registrar
       </button>
