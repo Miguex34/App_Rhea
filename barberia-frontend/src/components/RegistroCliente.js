@@ -14,8 +14,6 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
   });
 
   const [captchaToken, setCaptchaToken] = useState(null);
-  const [emailError, setEmailError] = useState(""); // Manejo del error de correo
-  const [errorMessage, setErrorMessage] = useState(""); // Mensaje de error
   const API_URL = process.env.REACT_APP_API_URL;
 
   // Hacer handleCaptchaChange accesible globalmente
@@ -37,27 +35,27 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
     try {
       const result = await verificarCorreo(API_URL, formData.email_cliente);
       if (result.registrado) {
-        setEmailError("El correo ya está registrado. Completa tu cuenta.");
-        setErrorMessage(
-          `El correo ya está registrado. Completa tu cuenta <a href="https://apprhea-production.up.railway.app/completar-cuenta?email=${formData.email_cliente}" class="text-blue-500 underline">aquí</a>.`
+        toast.error(
+          <>
+            El correo ya está registrado. Completa tu cuenta{" "}
+            <a
+              href={`https://apprhea-production.up.railway.app/completar-cuenta?email=${formData.email_cliente}`}
+              className="text-blue-500 underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              aquí
+            </a>.
+          </>
         );
-      } else {
-        setEmailError("");
-        setErrorMessage("");
       }
     } catch (error) {
-      setEmailError("Error al verificar el correo.");
-      setErrorMessage("Error al verificar el correo.");
+      toast.error("Error al verificar el correo.");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (emailError) {
-      toast.error(emailError);
-      return;
-    }
 
     if (formData.password_cliente !== formData.confirmar_password) {
       toast.error("Las contraseñas no coinciden.");
@@ -87,11 +85,21 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
       }, 2000);
     } catch (error) {
       if (error.response?.data?.is_guest) {
-        setErrorMessage(
-          `Este correo ya está asociado a una cuenta. Completa tu cuenta <a href="https://apprhea-production.up.railway.app/completar-cuenta?email=${formData.email_cliente}" class="text-blue-500 underline">aquí</a>.`
+        toast.error(
+          <>
+            Este correo ya está asociado a una cuenta. Completa tu cuenta{" "}
+            <a
+              href={`https://apprhea-production.up.railway.app/completar-cuenta?email=${formData.email_cliente}`}
+              className="text-blue-500 underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              aquí
+            </a>.
+          </>
         );
       } else {
-        setErrorMessage("Ocurrió un error durante el registro.");
+        toast.error("Ocurrió un error durante el registro.");
       }
     }
   };
@@ -102,17 +110,6 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
           Registro de Cliente
         </h2>
-  
-        {/* Mostrar errores globales */}
-        {(emailError || errorMessage) && (
-          <div
-            className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm text-center"
-            dangerouslySetInnerHTML={{
-              __html: emailError || errorMessage,
-            }}
-          ></div>
-        )}
-  
         <form onSubmit={handleSubmit}>
           <div className="mb-6">
             <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
@@ -221,5 +218,6 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
       </div>
     </div>
   );
-}
+};
+
 export default RegistroCliente;
