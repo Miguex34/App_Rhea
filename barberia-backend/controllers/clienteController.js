@@ -5,35 +5,9 @@ const { Reserva, Servicio, Usuario, Empleado } = require('../models/associations
 const axios = require('axios');
 
 const crearCuentaCliente = async (req, res) => {
-  const { nombre, apellido, email_cliente, password_cliente, celular_cliente, captchaToken } = req.body;
-
-  if (!captchaToken) {
-    return res.status(400).json({ message: "Captcha no proporcionado." });
-  }
-
+  const { nombre, apellido, email_cliente, password_cliente, celular_cliente } = req.body;
   try {
-    // Verificar el token de Google reCAPTCHA
-    const response = await axios.post(
-      "https://hcaptcha.com/siteverify",
-      null,
-      {
-        params: {
-          secret: process.env.HCAPTCHA_SECRET_KEY,
-          response: captchaToken,
-        },
-      }
-    );
-
-    if (!response.data.success) {
-      return res.status(400).json({
-        message: "Captcha inválido. Verificación fallida.",
-      });
-    }
-
-    if (!captchaResponse.data.success) {
-      return res.status(400).json({ message: "Captcha inválido. Verificación fallida." });
-    }
-
+    
     // Validar si el correo ya está en uso
     const clienteExistente = await Cliente.findOne({ where: { email_cliente } });
     if (clienteExistente) {
