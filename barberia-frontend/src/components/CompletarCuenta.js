@@ -1,10 +1,11 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FiPhone, FiLock } from "react-icons/fi"; // Icons
 import logo from "../assets/images/logo.png";
+
 const CompletarCuenta = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -14,8 +15,20 @@ const CompletarCuenta = () => {
     confirmar_password: "",
   });
 
+  useEffect(() => {
+    // Verifica que el negocio seleccionado esté almacenado en el sessionStorage
+    if (!sessionStorage.getItem("negocioSeleccionado")) {
+      toast.error("No se encontró un negocio seleccionado.");
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.password_cliente.length < 8) {
+      toast.error("La contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
 
     if (formData.password_cliente !== formData.confirmar_password) {
       toast.error("Las contraseñas no coinciden.");
@@ -30,9 +43,16 @@ const CompletarCuenta = () => {
     try {
       await axios.put(`${process.env.REACT_APP_API_URL}/api/clientes/completar-cuenta`, formData);
       toast.success("Cuenta completada exitosamente.");
-      navigate(`/negocio/${sessionStorage.getItem("negocioSeleccionado")}`);
+      const negocioSeleccionado = sessionStorage.getItem("negocioSeleccionado");
+      navigate(`/negocio/${negocioSeleccionado}`);
     } catch (error) {
       toast.error(error.response?.data?.message || "Ocurrió un error.");
+    }
+  };
+
+  const handleCellphoneKeyPress = (e) => {
+    if (!/[0-9]/.test(e.key)) {
+      e.preventDefault(); // Restringe caracteres no numéricos
     }
   };
 
@@ -41,7 +61,7 @@ const CompletarCuenta = () => {
       {/* Navbar */}
       <nav className="flex justify-between items-center px-6 py-4 bg-gray-800 text-white">
         <div className="flex items-center space-x-4">
-        <img
+          <img
             src={logo}
             alt="Rhea Reserve Logo"
             className="h-10 cursor-pointer"
@@ -92,6 +112,7 @@ const CompletarCuenta = () => {
                 name="celular_cliente"
                 placeholder="Teléfono (9 dígitos)"
                 value={formData.celular_cliente}
+                onKeyPress={handleCellphoneKeyPress}
                 onChange={(e) =>
                   setFormData({ ...formData, celular_cliente: e.target.value })
                 }
@@ -153,3 +174,4 @@ const CompletarCuenta = () => {
 };
 
 export default CompletarCuenta;
+
