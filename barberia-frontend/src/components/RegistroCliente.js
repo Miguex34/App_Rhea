@@ -6,7 +6,7 @@ import { verificarCorreo } from "../services/VerifyCorreo";
 const RegistroCliente = ({ closeModal, setAuth }) => {
   const [formData, setFormData] = useState({
     nombre: "",
-    apellido: "",
+    apellido: null,
     email_cliente: "",
     password_cliente: "",
     confirmar_password: "",
@@ -56,22 +56,22 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (formData.password_cliente !== formData.confirmar_password) {
       toast.error("Las contraseñas no coinciden.");
       return;
     }
-
+  
     if (!/^\d{9}$/.test(formData.celular_cliente)) {
       toast.error("El número de celular debe contener exactamente 9 dígitos.");
       return;
     }
-
+  
     if (!captchaToken) {
       toast.error("Por favor, verifica que no eres un robot.");
       return;
     }
-
+  
     try {
       const response = await axios.post(`${API_URL}/api/clientes/register`, {
         ...formData,
@@ -86,17 +86,7 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
     } catch (error) {
       if (error.response?.data?.is_guest) {
         toast.error(
-          <>
-            Este correo ya está asociado a una cuenta. Completa tu cuenta{" "}
-            <a
-              href={`https://apprhea-production.up.railway.app/completar-cuenta?email=${formData.email_cliente}`}
-              className="text-blue-500 underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              aquí
-            </a>.
-          </>
+          `Este correo ya está asociado a una cuenta. Completa tu cuenta aquí: https://apprhea-production.up.railway.app/completar-cuenta?email=${formData.email_cliente}`
         );
       } else {
         toast.error("Ocurrió un error durante el registro.");
@@ -126,14 +116,14 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
             />
           </div>
           <div className="mb-6">
-            <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">
-              Apellido
+            <label htmlFor="celular_cliente" className="block text-sm font-medium text-gray-700">
+              Celular
             </label>
             <input
               type="text"
-              id="apellido"
-              name="apellido"
-              value={formData.apellido}
+              id="celular_cliente"
+              name="celular_cliente"
+              value={formData.celular_cliente}
               onChange={handleInputChange}
               required
               className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2"
@@ -182,25 +172,16 @@ const RegistroCliente = ({ closeModal, setAuth }) => {
               className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2"
             />
           </div>
-          <div className="mb-6">
-            <label htmlFor="celular_cliente" className="block text-sm font-medium text-gray-700">
-              Celular
-            </label>
-            <input
-              type="text"
-              id="celular_cliente"
-              name="celular_cliente"
-              value={formData.celular_cliente}
-              onChange={handleInputChange}
-              required
-              className="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 px-4 py-2"
-            />
-          </div>
           <div
             className="h-captcha mb-6"
             data-sitekey="40f08a70-5eb4-4392-a966-e2ee316281f2"
             data-callback="handleCaptchaChange"
           ></div>
+          <div
+          className="h-captcha mb-6"
+          data-sitekey="40f08a70-5eb4-4392-a966-e2ee316281f2"
+          data-callback="handleCaptchaChange"
+        ></div>
           <button
             type="submit"
             className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
