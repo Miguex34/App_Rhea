@@ -127,10 +127,21 @@ const PasoRegistroReserva = () => {
                 }
     
                 const response = await axios.post(`${API_URL}/api/clientes/loginc`, loginData);
-                const clienteId = response.data.clienteId;
     
-                // Guardar clienteId en sessionStorage para el flujo de reserva
-                sessionStorage.setItem('clienteId', clienteId);
+                // Desestructurar datos del cliente de la respuesta
+                const { clienteId, nombre, email, telefono, comentario } = response.data;
+    
+                // Guardar todos los datos relevantes del cliente en sessionStorage
+                sessionStorage.setItem(
+                    'reservaCliente',
+                    JSON.stringify({
+                        clienteId,
+                        nombre,
+                        email,
+                        telefono,
+                        comentario_cliente: comentario,
+                    })
+                );
     
                 navigate('/metodo-pago');
             } catch (error) {
