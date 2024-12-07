@@ -14,7 +14,7 @@ const RegistroEmpleado = () => {
     nombre: '',
     contraseña: '',
     telefono: '',
-    cargo: '',
+    cargo: 'Empleado',
     disponibilidad: {
       lunes: { disponible: true, hora_inicio: null, hora_fin: null },
       martes: { disponible: true, hora_inicio: null, hora_fin: null },
@@ -162,19 +162,6 @@ const RegistroEmpleado = () => {
               required
             />
             {errors.telefono && <p className="text-red-500 text-xs mt-1">{errors.telefono}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Cargo</label>
-            <input
-              type="text"
-              name="cargo"
-              value={formData.cargo}
-              onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none"
-              placeholder="Ingresa tu cargo"
-              required
-            />
-            {errors.cargo && <p className="text-red-500 text-xs mt-1">{errors.cargo}</p>}
           </div>
 
           {/* Render availability for each day */}

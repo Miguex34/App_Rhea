@@ -659,22 +659,15 @@ if (!descripcionRegex.test(descripcion)) {
                 <h3 className="text-xl font-medium text-gray-700">Configura tu Disponibilidad</h3>
                 {disponibilidad.map((item, index) => (
                   <div key={index} className="flex items-center space-x-4">
-                    <span className="w-24 font-medium text-gray-700">{diasSemana[index]}</span>
                     <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                       <TimePicker
-                        value={item.hora_inicio}
-                        onChange={(newValue) =>
-                          handleDisponibilidadChange(newValue, index, "hora_inicio")
-                        }
+                        value={dayjs(item.hora_inicio, "HH:mm:ss")}
+                        onChange={(newValue) => handleDisponibilidadChange(newValue, index, "hora_inicio")}
                         renderInput={(params) => <input {...params} className="p-2 border rounded" />}
                       />
-                    </LocalizationProvider>
-                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                       <TimePicker
-                        value={item.hora_fin}
-                        onChange={(newValue) =>
-                          handleDisponibilidadChange(newValue, index, "hora_fin")
-                        }
+                        value={dayjs(item.hora_fin, "HH:mm:ss")}
+                        onChange={(newValue) => handleDisponibilidadChange(newValue, index, "hora_fin")}
                         renderInput={(params) => <input {...params} className="p-2 border rounded" />}
                       />
                     </LocalizationProvider>
