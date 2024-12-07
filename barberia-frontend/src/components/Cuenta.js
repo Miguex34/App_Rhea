@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { FcInfo, FcExpand, FcCalendar, FcManager, FcOrganization } from "react-icons/fc";
 
 const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const categorias = [
@@ -41,7 +42,11 @@ const Cuenta = () => {
   const [logoUrl, setLogoUrl] = useState('');
   const [realizaServicios, setRealizaServicios] = useState(false); 
   const [disponibilidad, setDisponibilidad] = useState([]); // 
-  const [isSavingDisponibilidad] = useState(false);
+  const [isSavingDisponibilidad, setIsSavingDisponibilidad] = useState(false);
+  const [showDatosNegocio, setShowDatosNegocio] = useState(false);
+  const [showHorarioNegocio, setShowHorarioNegocio] = useState(false);
+  const [showRealizasServicios, setShowRealizasServicios] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   const fetchHorarios = useCallback(async (id_negocio) => {
     try {
@@ -445,178 +450,260 @@ if (!descripcionRegex.test(descripcion)) {
 
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
-      <ToastContainer /> {/* Add this to enable Toastify notifications */}
+      <ToastContainer /> {/* Notificaciones */}
+  
       <h1 className="text-3xl font-bold mb-4">
         ¡Bienvenido <span className="text-purple-500">{user.nombre}</span>!
       </h1>
+      
       <p className="mb-8">Comencemos con el proceso de completar la información de tu negocio.</p>
-  
-      {/* Formulario para categoría */}
-      <form className="bg-white p-6 rounded shadow-md space-y-6 mb-6">
-        <div>
-          <label className="block font-semibold mb-2">Tipo de Negocio</label>
-          <select
-            value={categoria}
-            onChange={handleCategoriaChange} 
-            className="p-2 border rounded w-full bg-gray-100"
-          >
-            <option value="">Selecciona una categoría</option>
-            {categorias.map((cat, index) => (
-              <option key={index} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
+      <button
+          onClick={() => setShowHelp(!showHelp)}
+          className="text-gray-600 hover:text-blue-600"
+          title="¿Cómo completar tu cuenta?"
+        >
+          <FcInfo size={24} />
+        </button>
+        {/* Sección de Ayuda */}
+      {showHelp && (
+        <div className="bg-gray-100 p-4 rounded shadow-md mb-4">
+          <h3 className="text-xl font-semibold mb-2">¿Cómo completar tu cuenta?</h3>
+          <ol className="list-decimal pl-6 text-gray-700">
+            <li>
+              <strong>Tipo de Negocio:</strong> Selecciona la categoría que mejor describa tu negocio (ejemplo: "Barbería").
+            </li>
+            <li>
+              <strong>Descripción del Negocio:</strong> Escribe una breve descripción de tu negocio.
+              <span className="block text-sm text-gray-600">Restricción: Entre 10 y 100 caracteres. Solo se permiten letras, números y algunos caracteres comunes.</span>
+            </li>
+            <li>
+              <strong>Logo del Negocio:</strong> Carga una imagen que represente tu negocio. Si ya existe un logo, puedes reemplazarlo.
+            </li>
+            <li>
+              <strong>Horario del Negocio:</strong> Configura los horarios de atención para cada día de la semana:
+              <ul className="list-disc pl-6 mt-1">
+                <li>Selecciona la hora de apertura y cierre.</li>
+                <li>Marca la casilla "Cerrado" si no trabajas ese día.</li>
+              </ul>
+            </li>
+            <li>
+              <strong>¿Realizas Servicios?:</strong> Si el dueño del negocio realiza servicios, marca la casilla correspondiente y configura tu disponibilidad horaria.
+            </li>
+          </ol>
+          <p className="mt-2 text-gray-600">
+            Nota: Recuerda guardar los cambios en cada sección para que se actualicen correctamente.
+          </p>
         </div>
-  
-        {/* Campo para descripción del negocio */}
-        <div>
-          <label className="block font-semibold mb-2">Descripción del negocio</label>
-          <textarea
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            className="p-2 border rounded w-full bg-gray-100"
-            placeholder="Describe tu negocio aquí"
-          />
+      )}
+      {/* Sección 1: Datos del Negocio */}
+      <div className="bg-white rounded shadow-md mb-4">
+        <div
+          className="flex justify-between items-center p-4 cursor-pointer"
+          onClick={() => setShowDatosNegocio(!showDatosNegocio)}
+        >
+          <div className="flex items-center space-x-2">
+            <FcOrganization size={24} />
+            <h2 className="text-xl font-semibold">Datos del Negocio</h2>
+          </div>
+          <FcExpand size={24} />
         </div>
-        {logoUrl && (
-          <div className="mb-6">
-            <img src={logoUrl} alt="Logo del negocio" className="w-48 h-48 object-cover" />
-            <p className="text-green-500">Imagen del logo ya cargada. Si subes otra, reemplazará la actual.</p>
+        {showDatosNegocio && (
+          <div className="p-4 border-t">
+            {/* Formulario de Datos del Negocio */}
+            <form className="space-y-6">
+              <div>
+                <label className="block font-semibold mb-2">Tipo de Negocio</label>
+                <select
+                  value={categoria}
+                  onChange={handleCategoriaChange}
+                  className="p-2 border rounded w-full bg-gray-100"
+                >
+                  <option value="">Selecciona una categoría</option>
+                  {categorias.map((cat, index) => (
+                    <option key={index} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block font-semibold mb-2">Descripción del negocio</label>
+                <textarea
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                  className="p-2 border rounded w-full bg-gray-100"
+                  placeholder="Describe tu negocio aquí"
+                />
+              </div>
+              {logoUrl && (
+                <div className="mb-6">
+                  <img src={logoUrl} alt="Logo del negocio" className="w-48 h-48 object-cover" />
+                  <p className="text-green-500">Imagen del logo ya cargada. Si subes otra, reemplazará la actual.</p>
+                </div>
+              )}
+              <div>
+                <label className="block font-semibold mb-2">Logo del negocio</label>
+                <input
+                  type="file"
+                  onChange={handleLogoChange}
+                  className="p-2 border rounded w-full bg-gray-100"
+                  accept="image/*"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="bg-purple-500 text-white px-4 py-2 rounded"
+              >
+                Guardar Datos del Negocio
+              </button>
+            </form>
           </div>
         )}
-        <div>
-          <label className="block font-semibold mb-2">Logo del negocio</label>
-          <input
-            type="file"
-            onChange={handleLogoChange}
-            className="p-2 border rounded w-full bg-gray-100"
-            accept="image/*"
-          />
-        </div>
-        <button
-          type="button"
-          onClick={handleSubmit}
-          className="bg-purple-500 text-white px-4 py-2 rounded"
-        >
-          Guardar Datos del Negocio
-        </button>
-      </form>
-  
-      {/* Formulario para horario */}
-      <form onSubmit={handleHorarioSubmit} className="bg-white p-6 rounded shadow-md space-y-6">
-        <div>
-          <label className="block font-semibold mb-2">Horario de Apertura</label>
-          {Array.isArray(horarios) && horarios.length > 0 && horarios.map((dia, index) => (
-            <div key={index} className="flex items-center space-x-4 mb-2">
-              <span className="w-20">{dia.dia}</span>
-              <input
-                type="time"
-                name="desde"
-                value={dia.desde}
-                data-index={index}
-                onChange={handleChange}
-                className="p-2 border rounded"
-              />
-              <input
-                type="time"
-                name="hasta"
-                value={dia.hasta}
-                data-index={index}
-                onChange={handleChange}
-                className="p-2 border rounded"
-              />
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="cerrado"
-                  checked={dia.cerrado}
-                  data-index={index}
-                  onChange={handleChange}
-                />
-                <span>Cerrado</span>
-              </label>
-            </div>
-          ))}
-        </div>
-        <button type="submit" className="bg-purple-500 text-white px-4 py-2 rounded">
-          Guardar Horarios
-        </button>
-      </form>
-  
-      <div className="flex items-center space-x-3 mt-6">
-        <label
-          htmlFor="realizaServicios"
-          className="text-lg font-semibold text-gray-700"
-        >
-          ¿Realizas Servicios?
-        </label>
-        <input
-          id="realizaServicios"
-          type="checkbox"
-          checked={realizaServicios}
-          onChange={handleRealizaServiciosChange}
-          className="form-checkbox h-5 w-5 text-purple-500"
-        />
       </div>
   
-      {realizaServicios && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            saveDisponibilidad();
-          }}
-          className="bg-white p-6 rounded-lg shadow-md space-y-6"
+      {/* Sección 2: Horario del Negocio */}
+      <div className="bg-white rounded shadow-md mb-4">
+        <div
+          className="flex justify-between items-center p-4 cursor-pointer"
+          onClick={() => setShowHorarioNegocio(!showHorarioNegocio)}
         >
-          <h3 className="text-xl font-medium text-gray-700">
-            Configura tu Disponibilidad
-          </h3>
-          {disponibilidad.map((item, index) => (
-            <div key={index} className="flex items-center space-x-4">
-              {/* Mostrar el nombre del día */}
-              <span className="w-24 font-medium text-gray-700">{diasSemana[index]}</span>
-
-              {/* TimePicker para hora de inicio */}
-              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-                <TimePicker
-                  value={dayjs(item.hora_inicio, 'HH:mm:ss')}
-                  onChange={(newValue) => handleDisponibilidadChange(newValue, index, 'hora_inicio')}
-                  renderInput={(params) => <input {...params} className="border p-2 rounded" />}
-                />
-              </LocalizationProvider>
-
-              {/* TimePicker para hora de fin */}
-              <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-                <TimePicker
-                  value={dayjs(item.hora_fin, 'HH:mm:ss')}
-                  onChange={(newValue) => handleDisponibilidadChange(newValue, index, 'hora_fin')}
-                  renderInput={(params) => <input {...params} className="border p-2 rounded" />}
-                />
-              </LocalizationProvider>
-
-              {/* Checkbox para marcar si está cerrado */}
+          <div className="flex items-center space-x-2">
+            <FcCalendar size={24} />
+            <h2 className="text-xl font-semibold">Horario del Negocio</h2>
+          </div>
+          <FcExpand size={24} />
+        </div>
+        {showHorarioNegocio && (
+          <div className="p-4 border-t">
+            {/* Formulario de Horario */}
+            <form onSubmit={handleHorarioSubmit} className="space-y-6">
+              <div>
+                <label className="block font-semibold mb-2">Horario de Apertura</label>
+                {Array.isArray(horarios) &&
+                  horarios.map((dia, index) => (
+                    <div key={index} className="flex items-center space-x-4 mb-2">
+                      <span className="w-20">{dia.dia}</span>
+                      <input
+                        type="time"
+                        name="desde"
+                        value={dia.desde}
+                        data-index={index}
+                        onChange={handleChange}
+                        className="p-2 border rounded"
+                      />
+                      <input
+                        type="time"
+                        name="hasta"
+                        value={dia.hasta}
+                        data-index={index}
+                        onChange={handleChange}
+                        className="p-2 border rounded"
+                      />
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          name="cerrado"
+                          checked={dia.cerrado}
+                          data-index={index}
+                          onChange={handleChange}
+                        />
+                        <span>Cerrado</span>
+                      </label>
+                    </div>
+                  ))}
+              </div>
+              <button type="submit" className="bg-purple-500 text-white px-4 py-2 rounded">
+                Guardar Horarios
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+  
+      {/* Sección 3: ¿Realizas Servicios? */}
+      <div className="bg-white rounded shadow-md mb-4">
+        <div
+          className="flex justify-between items-center p-4 cursor-pointer"
+          onClick={() => setShowRealizasServicios(!showRealizasServicios)}
+        >
+          <div className="flex items-center space-x-2">
+            <FcManager size={24} />
+            <h2 className="text-xl font-semibold">¿Realizas Servicios?</h2>
+          </div>
+          <FcExpand size={24} />
+        </div>
+        {showRealizasServicios && (
+          <div className="p-4 border-t">
+            <div className="flex items-center space-x-3 mb-4">
+              <label htmlFor="realizaServicios" className="text-lg font-semibold text-gray-700">
+                ¿Realizas Servicios?
+              </label>
               <input
+                id="realizaServicios"
                 type="checkbox"
-                checked={!item.disponible}
-                onChange={(e) => handleDisponibilidadChange(e.target.checked, index, 'disponible')}
+                checked={realizaServicios}
+                onChange={handleRealizaServiciosChange}
                 className="form-checkbox h-5 w-5 text-purple-500"
               />
-
-              {/* Mostrar siempre el texto "Cerrado" */}
-              <span className="text-gray-700">{!item.disponible ? 'Cerrado' : 'Abierto'}</span>
             </div>
-          ))}
-          <button
-            type="submit"
-            className="w-full bg-purple-500 text-white px-4 py-2 rounded-md shadow-md hover:bg-purple-600 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
-            disabled={isSavingDisponibilidad}
-          >
-            {isSavingDisponibilidad ? 'Guardando...' : 'Guardar Disponibilidad'}
-          </button>
-        </form>
-      )}
+            {realizaServicios && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setIsSavingDisponibilidad(true);
+                  saveDisponibilidad().finally(() => setIsSavingDisponibilidad(false));
+                }}
+                className="space-y-6"
+              >
+                <h3 className="text-xl font-medium text-gray-700">Configura tu Disponibilidad</h3>
+                {disponibilidad.map((item, index) => (
+                  <div key={index} className="flex items-center space-x-4">
+                    <span className="w-24 font-medium text-gray-700">{diasSemana[index]}</span>
+                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+                      <TimePicker
+                        value={item.hora_inicio}
+                        onChange={(newValue) =>
+                          handleDisponibilidadChange(newValue, index, "hora_inicio")
+                        }
+                        renderInput={(params) => <input {...params} className="p-2 border rounded" />}
+                      />
+                    </LocalizationProvider>
+                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
+                      <TimePicker
+                        value={item.hora_fin}
+                        onChange={(newValue) =>
+                          handleDisponibilidadChange(newValue, index, "hora_fin")
+                        }
+                        renderInput={(params) => <input {...params} className="p-2 border rounded" />}
+                      />
+                    </LocalizationProvider>
+                    <input
+                      type="checkbox"
+                      checked={!item.disponible}
+                      onChange={(e) =>
+                        handleDisponibilidadChange(!e.target.checked, index, "disponible")
+                      }
+                      className="form-checkbox h-5 w-5 text-purple-500"
+                    />
+                    <span>{!item.disponible ? "Cerrado" : "Abierto"}</span>
+                  </div>
+                ))}
+                <button
+                  type="submit"
+                  className="bg-purple-500 text-white px-4 py-2 rounded w-full"
+                  disabled={isSavingDisponibilidad}
+                >
+                  {isSavingDisponibilidad ? "Guardando..." : "Guardar Disponibilidad"}
+                </button>
+              </form>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
+
 };
 <ToastContainer />
 

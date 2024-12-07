@@ -1,11 +1,12 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import axios from 'axios';
 import Modal from './Modal'; 
-
+import { FcInfo } from "react-icons/fc";
 const Profesionales = () => {
   const [empleados, setEmpleados] = useState([]);
   const [showModal, setShowModal] = useState(false); // Estado para manejar el modal
   const API_URL = process.env.REACT_APP_API_URL;
+  const [showHelp, setShowHelp] = useState(false);
 
   // Memoizar la función cargarEmpleados
   const cargarEmpleados = useCallback(async (id_negocio) => {
@@ -56,7 +57,28 @@ const Profesionales = () => {
   return (
     <div className="max-w-6xl mx-auto bg-gray-200 p-8 shadow-md rounded-md mt-10">
       <h1 className="text-3xl font-bold text-center mb-8">Profesionales</h1>
-      
+      <button
+          onClick={() => setShowHelp(!showHelp)}
+          className="text-gray-600 hover:text-blue-600"
+          title="¿Cómo invitar a un colaborador?"
+        >
+          <FcInfo size={24} />
+        </button>
+        
+        {showHelp && (
+          <div className="bg-gray-100 p-4 rounded shadow-md mb-4">
+            <h3 className="text-xl font-semibold mb-2">¿Cómo invitar a un colaborador?</h3>
+            <ol className="list-decimal pl-6 text-gray-700">
+              <li>Haz clic en el botón <strong>"Invitar Colaborador"</strong> ubicado en la parte inferior derecha.</li>
+              <li>En la ventana emergente, ingresa el correo electrónico del empleado que deseas invitar.</li>
+              <li>Presiona el botón <strong>"Enviar"</strong> para enviar la invitación.</li>
+              <li>Si todo es correcto, recibirás un mensaje de confirmación indicando que la invitación fue enviada exitosamente.</li>
+            </ol>
+            <p className="mt-2 text-gray-600">
+              Nota: Asegúrate de que el correo electrónico ingresado sea válido para evitar errores.
+            </p>
+          </div>
+        )}
       {/* Botón para invitar un colaborador */}
       <button 
         onClick={openModal} 
