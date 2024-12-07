@@ -17,10 +17,10 @@ const LoginForm = ({ closeModal, setAuth }) => {
 
   const verificarCorreoExistente = async () => {
     try {
-      const result = await verificarCorreo(API_URL, formData.email_cliente);
+      const result = await verificarCorreo(API_URL, formData.correo);
       if (result.registrado) {
         setEmailLink(
-          `https://apprhea-production.up.railway.app/completar-cuenta?email=${formData.email_cliente}`
+          `https://apprhea-production.up.railway.app/completar-cuenta?email=${formData.correo}`
         );
       } else {
         setEmailLink(""); // Limpia el enlace si el correo no está registrado
@@ -30,6 +30,7 @@ const LoginForm = ({ closeModal, setAuth }) => {
       setEmailLink(""); // En caso de error, limpia el enlace
     }
   };
+  
 
   const fetchUser = async (token) => {
     try {
