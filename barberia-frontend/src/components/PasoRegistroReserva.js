@@ -91,9 +91,9 @@ const PasoRegistroReserva = () => {
         navigate('/pregunta-preferencia');
     };
 
-    const handleSiguiente = () => {
+    const handleSiguiente = async () => {
         if (modoRegistro === 'invitado') {
-            const { nombre, email, telefono, comentario } = formData; // Ajuste aquí
+            const { nombre, email, telefono, comentario } = formData;
     
             // Validar campos antes de continuar
             if (!validateFields()) {
@@ -109,17 +109,34 @@ const PasoRegistroReserva = () => {
             // Guardar datos en sessionStorage
             sessionStorage.setItem(
                 'reservaInvitado',
-                JSON.stringify({ 
-                    nombre, 
-                    email, 
-                    telefono, 
-                    comentario_cliente: comentario // Guardamos correctamente el comentario
+                JSON.stringify({
+                    nombre,
+                    email,
+                    telefono,
+                    comentario_cliente: comentario,
                 })
             );
-            
+    
             navigate('/metodo-pago');
         } else {
-            alert('Por favor, inicia sesión para continuar.');
+            // Lógica para login
+            try {
+                if (!loginData.correo || !loginData.contraseña) {
+                    alert('Por favor, completa los campos de login.');
+                    return;
+                }
+    
+                const response = await axios.post(`${API_URL}/api/clientes/loginc`, loginData);
+                const clienteId = response.data.clienteId;
+    
+                // Guardar clienteId en sessionStorage para el flujo de reserva
+                sessionStorage.setItem('clienteId', clienteId);
+    
+                navigate('/metodo-pago');
+            } catch (error) {
+                console.error('Error al iniciar sesión:', error);
+                alert('Credenciales inválidas. Por favor, verifica tu correo y contraseña.');
+            }
         }
     };
 

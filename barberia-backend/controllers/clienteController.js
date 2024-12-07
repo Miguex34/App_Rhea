@@ -56,7 +56,9 @@ const crearCuentaCliente = async (req, res) => {
 
   const loginCliente = async (req, res) => {
     const { correo, contraseña } = req.body;
-
+    if (!correo || !contraseña) {
+      return res.status(400).json({ message: 'Correo y contraseña son requeridos' });
+  }
     try {
         const cliente = await Cliente.findOne({ where: { email_cliente: correo } });
 
@@ -78,7 +80,8 @@ const crearCuentaCliente = async (req, res) => {
         const token = jwt.sign({ id: cliente.id, correo: cliente.email_cliente }, process.env.JWT_SECRET, {
             expiresIn: '1d',
         }); 
-        return res.status(200).json({ message: 'Inicio de sesión exitoso', token });
+        return res.status(200).json({ message: 'Inicio de sesión exitoso', token,clienteId: cliente.id,
+          nombre: cliente.nombre, });
     } catch (error) {
         console.error('Error en el inicio de sesión:', error);
         return res.status(500).json({ error: 'Error al iniciar sesión', detalle: error.message });
