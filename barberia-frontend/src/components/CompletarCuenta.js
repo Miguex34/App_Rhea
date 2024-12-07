@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -16,17 +16,8 @@ const CompletarCuenta = () => {
   });
 
   const [errors, setErrors] = useState({}); // Para manejar errores visuales
-  const [negocioSeleccionado, setNegocioSeleccionado] = useState("");
 
-  useEffect(() => {
-    // Verifica que el negocio seleccionado esté almacenado en el sessionStorage
-    const negocio = sessionStorage.getItem("negocioSeleccionado");
-    if (!negocio) {
-      toast.error("No se encontró un negocio seleccionado.");
-    } else {
-      setNegocioSeleccionado(negocio);
-    }
-  }, []);
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,7 +47,7 @@ const CompletarCuenta = () => {
       // Petición al backend
       await axios.put(`${process.env.REACT_APP_API_URL}/api/clientes/completar-cuenta`, formData);
       toast.success("Cuenta completada exitosamente.");
-      navigate(`/negocio/${negocioSeleccionado}`);
+      navigate(`/principal`);
     } catch (error) {
       toast.error(error.response?.data?.message || "Ocurrió un error.");
     }

@@ -12,7 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const categorias = [
   'Barbería', 
-  'salón de manicura y pedicura', 
+  'Salón de manicura y pedicura', 
   'Spa', 
   'Masajes', 
   'Peluquería', 
@@ -39,7 +39,7 @@ const Cuenta = () => {
   // Estado para el archivo del logo
   const [logoFile, setLogoFile] = useState(null);
   const [logoUrl, setLogoUrl] = useState('');
-  const [realizaServicios, setRealizaServicios] = useState(false); // Estado del checkbox
+  const [realizaServicios, setRealizaServicios] = useState(false); 
   const [disponibilidad, setDisponibilidad] = useState([]); // 
   const [isSavingDisponibilidad] = useState(false);
 
@@ -326,7 +326,12 @@ if (!descripcionRegex.test(descripcion)) {
       console.error('Error al actualizar los horarios:', error);
     }
   };
-
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem('usuario'));
+    if (storedUser) {
+      setUser(storedUser); 
+    }
+  }, []);
   
 
   // Función para manejar el cambio del checkbox "¿Realizas Servicios?"

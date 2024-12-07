@@ -18,11 +18,13 @@ const register = async (req, res) => {
     contraseña,
     telefono,
     nombreNegocio,
-    correoNegocio, // Nuevo campo
+    correoNegocio,
     telefonoNegocio,
     direccionNegocio,
     cargo,
   } = req.body;
+
+  const transaction = await sequelize.transaction(); // Iniciar transacción
 
   try {
     // Verificar si el correo ya está registrado
@@ -40,32 +42,42 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(contraseña, 10);
 
     // Crear el usuario
-    const nuevoUsuario = await Usuario.create({
-      nombre,
-      correo,
-      contrasena_hash: hashedPassword,
-      telefono,
-      cargo,
-    });
+    const nuevoUsuario = await Usuario.create(
+      {
+        nombre,
+        correo,
+        contrasena_hash: hashedPassword,
+        telefono,
+        cargo,
+      },
+      { transaction } // Asegurar que sea parte de la transacción
+    );
 
     console.log('Usuario creado:', nuevoUsuario);
 
     // Crear el negocio relacionado con el usuario
-    const nuevoNegocio = await Negocio.create({
-      nombre: nombreNegocio,
-      correo: correoNegocio, // Guardar correo del negocio
-      telefono: telefonoNegocio,
-      direccion: direccionNegocio,
-      id_dueno: nuevoUsuario.id,
-    });
+    const nuevoNegocio = await Negocio.create(
+      {
+        nombre: nombreNegocio,
+        correo: correoNegocio,
+        telefono: telefonoNegocio,
+        direccion: direccionNegocio,
+        id_dueno: nuevoUsuario.id,
+      },
+      { transaction }
+    );
 
-    // Crear la relación entre el usuario y el negocio (dueño de negocio)
-    await DuenoNegocio.create({
-      id_usuario: nuevoUsuario.id,
-      id_negocio: nuevoNegocio.id,
-    });
+    // Crear la relación entre el usuario y el negocio
+    await DuenoNegocio.create(
+      {
+        id_usuario: nuevoUsuario.id,
+        id_negocio: nuevoNegocio.id,
+      },
+      { transaction }
+    );
 
-    
+    // Confirmar la transacción
+    await transaction.commit();
 
     // Generar un token JWT para el usuario recién registrado
     const token = jwt.sign({ id: nuevoUsuario.id, correo: nuevoUsuario.correo }, process.env.JWT_SECRET, {
@@ -74,6 +86,9 @@ const register = async (req, res) => {
 
     return res.status(201).json({ message: 'Usuario y negocio creados con éxito', token });
   } catch (error) {
+    // Revertir los cambios en caso de error
+    await transaction.rollback();
+
     console.error('Error al registrar el usuario y crear el negocio:', error);
     return res.status(500).json({ error: 'Error en el registro', detalle: error.message });
   }

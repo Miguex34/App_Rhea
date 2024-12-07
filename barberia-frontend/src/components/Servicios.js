@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Importar useNavigate
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { FcMinus, FcPlus  } from "react-icons/fc";
+import { FcMinus, FcPlus, FcInfo  } from "react-icons/fc";
 
 const Servicios = () => {
   const [form, setForm] = useState({
@@ -21,7 +21,7 @@ const Servicios = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({ nombre: '', correo: '', id_negocio: null });
   const API_URL = process.env.REACT_APP_API_URL;
-
+  const [showHelp, setShowHelp] = useState(false);
   const cargarServicios = useCallback(async (id_negocio) => {
     try {
       const token = localStorage.getItem('token');
@@ -211,6 +211,75 @@ const Servicios = () => {
   return (
     <div className="container mx-auto p-6 bg-white shadow-lg rounded-lg">
       <ToastContainer position="top-center" autoClose={5000} />
+      {/* Encabezado con el ícono de ayuda */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-bold mb-6 text-center text-blue-600">Gestión de Servicios</h2>
+        <button
+          onClick={() => setShowHelp(!showHelp)}
+          className="text-gray-600 hover:text-blue-600"
+          title="¿Cómo crear un servicio?"
+        >
+          <FcInfo size={24} />
+        </button>
+      </div>
+
+      {/* Sección desplegable para el manual */}
+      {showHelp && (
+  <div className="bg-gray-100 p-4 rounded shadow-md mb-4">
+    <h3 className="text-xl font-semibold mb-2">¿Cómo crear un servicio?</h3>
+    <p className="text-gray-700 mb-4">
+      Sigue los pasos a continuación para completar correctamente el formulario y gestionar tus servicios:
+    </p>
+
+    <h4 className="text-lg font-bold mb-2">Completar el formulario del servicio:</h4>
+    <ul className="list-disc pl-6 text-gray-700">
+      <li>
+        <strong>Nombre del Servicio:</strong> Ingresa un nombre que identifique claramente el servicio (ejemplo: "Corte de Cabello").<br />
+        <span className="text-sm text-gray-600">Restricción: Solo puede contener letras y espacios, con un máximo de 20 caracteres.</span>
+      </li>
+      <li>
+        <strong>Descripción:</strong> Proporciona una breve descripción del servicio.<br />
+        <span className="text-sm text-gray-600">Restricción: Solo puede contener letras, con un máximo de 100 caracteres.</span>
+      </li>
+      <li>
+        <strong>Duración (minutos):</strong> Selecciona la duración del servicio en minutos desde el menú desplegable.
+      </li>
+      <li>
+        <strong>Precio:</strong> Ingresa el precio del servicio en pesos chilenos.<br />
+        <span className="text-sm text-gray-600">Restricción: Debe ser un número entre 1000 y 100000.</span>
+      </li>
+      <li>
+        <strong>Categoría:</strong> Especifica la categoría del servicio (por ejemplo: "Adulto").<br />
+        <span className="text-sm text-gray-600">Restricción: Solo puede contener letras, sin caracteres especiales ni números.</span>
+      </li>
+      <li>
+        <strong>Empleados Disponibles:</strong> Marca los empleados que realizarán este servicio. Es obligatorio seleccionar al menos uno.
+      </li>
+    </ul>
+
+    <h4 className="text-lg font-bold mt-4 mb-2">Guardar el servicio:</h4>
+    <ul className="list-disc pl-6 text-gray-700">
+      <li>Presiona el botón <strong>"Crear Servicio"</strong> para guardar el servicio.</li>
+      <li>Si todos los campos son válidos, recibirás un mensaje de confirmación: <strong>"¡Servicio guardado correctamente!"</strong>.</li>
+      <li>En caso de errores, revisa los mensajes de alerta y corrige los datos.</li>
+    </ul>
+
+    <h4 className="text-lg font-bold mt-4 mb-2">Verificar en la lista de servicios:</h4>
+    <ul className="list-disc pl-6 text-gray-700">
+      <li>
+        Después de crear el servicio, verifica que aparezca en la <strong>"Lista de Servicios"</strong> junto con su:
+      </li>
+      <ul className="list-disc pl-6">
+        <li>Nombre</li>
+        <li>Descripción</li>
+        <li>Duración</li>
+        <li>Precio</li>
+        <li>Empleados asignados</li>
+        <li>Categoría</li>
+      </ul>
+    </ul>
+  </div>
+)}
       <h2 className="text-3xl font-bold mb-6 text-center text-blue-600">Gestión de Servicios</h2>
       
       <form onSubmit={handleSubmit} className="mb-6 p-4 bg-gray-100 rounded-lg shadow-sm">
@@ -221,7 +290,7 @@ const Servicios = () => {
             name="nombre"
             value={form.nombre}
             onChange={handleChange}
-            placeholder="Nombre del Servicio"
+            placeholder="Ej: Lavado de Cabello"
             required
             className="mt-1 p-2 border border-gray-300 rounded w-full"
           />
@@ -233,7 +302,7 @@ const Servicios = () => {
             name="descripcion"
             value={form.descripcion}
             onChange={handleChange}
-            placeholder="Descripción del Servicio"
+            placeholder="Ej: Servicio básico de lavado y cuidado del cabello."
             className="mt-1 p-2 border border-gray-300 rounded w-full"
           />
         </div>
@@ -264,7 +333,7 @@ const Servicios = () => {
               name="precio"
               value={form.precio}
               onChange={handleChange}
-              placeholder="Precio"
+              placeholder="Ej: 10000"
               required
               className="mt-1 p-2 border border-gray-300 rounded w-full"
             />
@@ -278,7 +347,7 @@ const Servicios = () => {
             name="categoria"
             value={form.categoria}
             onChange={handleChange}
-            placeholder="Categoría"
+            placeholder="Ej: Adultos"
             className="mt-1 p-2 border border-gray-300 rounded w-full"
           />
         </div>
@@ -294,12 +363,12 @@ const Servicios = () => {
                 onChange={handleEmpleadoSelect}
                 className="h-4 w-4 text-blue-600 border-gray-300 rounded"
               />
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-center space-x-2">
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-300">
                   {empleado.foto_perfil ? (
                     <img src={empleado.foto_perfil} alt={`${empleado.nombre}`} className="h-full w-full object-cover" />
                   ) : (
-                    <span className="text-gray-500">👤</span>
+                    <span className="text-gray-500 text-lg">👤</span>
                   )}
                 </div>
                 <span className="text-gray-800 font-medium">{empleado.nombre}</span>

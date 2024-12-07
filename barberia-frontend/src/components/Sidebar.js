@@ -24,15 +24,14 @@ const Sidebar = () => {
   };
 
   useEffect(() => {
-    // Obtener el rol del usuario almacenado en localStorage
-    const storedUser = JSON.parse(localStorage.getItem('usuario'));
-    if (storedUser && storedUser.cargo) {
-      setRole(storedUser.cargo);
-    } else {
-      console.warn("No se encontró un usuario válido en localStorage.");
-      navigate('/login');
-    }
-  }, [navigate]);
+  const storedUser = JSON.parse(localStorage.getItem('usuario'));
+  if (storedUser && storedUser.cargo) {
+    setRole(storedUser.cargo);
+  } else {
+    console.warn("No se encontró un usuario válido en localStorage.");
+    navigate('/login');
+  }
+}, [location.pathname, navigate]);
 
   return (
     <div className={`h-screen bg-gray-900 text-white shadow-lg flex flex-col fixed top-0 left-0 transition-width duration-300 ${isMenuOpen ? 'w-64' : 'w-20'}`}>
