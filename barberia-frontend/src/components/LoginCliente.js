@@ -8,22 +8,26 @@ const LoginForm = ({ closeModal, setAuth }) => {
   const [formData, setFormData] = useState({ correo: "", contraseña: "" });
   const [error, setError] = useState(""); // Usar 'error' para manejar mensajes de error
   const API_URL = process.env.REACT_APP_API_URL;
+  const [emailLink, setEmailLink] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const verificarCorreoAntesLogin = async () => {
+  const verificarCorreoExistente = async () => {
     try {
-      const result = await verificarCorreo(API_URL, formData.correo);
-      if (result.registrado && result.is_guest) {
-        setError("El correo pertenece a un cliente invitado. Completa tu cuenta.");
+      const result = await verificarCorreo(API_URL, formData.email_cliente);
+      if (result.registrado) {
+        setEmailLink(
+          `https://apprhea-production.up.railway.app/completar-cuenta?email=${formData.email_cliente}`
+        );
       } else {
-        setError(""); // Limpiar el mensaje de error si todo está bien
+        setEmailLink(""); // Limpia el enlace si el correo no está registrado
       }
     } catch (error) {
-      setError("Error al verificar el correo.");
+      console.error("Error al verificar el correo:", error);
+      setEmailLink(""); // En caso de error, limpia el enlace
     }
   };
 
@@ -48,6 +52,7 @@ const LoginForm = ({ closeModal, setAuth }) => {
 
     if (error) {
       toast.error(error);
+      setError("");
       return;
     }
 
@@ -77,6 +82,7 @@ const LoginForm = ({ closeModal, setAuth }) => {
   };
 
   return (
+    
     <form onSubmit={handleLogin} className="bg-white p-6 rounded-md shadow-lg max-w-sm w-full">
       <ToastContainer position="top-center" autoClose={5000} />
 
@@ -89,10 +95,23 @@ const LoginForm = ({ closeModal, setAuth }) => {
           name="correo"
           value={formData.correo}
           onChange={handleInputChange}
-          onBlur={verificarCorreoAntesLogin}
+          onBlur={verificarCorreoExistente}
           className="border rounded w-full py-2 px-3"
           required
         />
+        {emailLink && (
+              <p className="mt-2 text-sm text-gray-600">
+                El correo ya está registrado.{" "}
+                <a
+                  href={emailLink}
+                  className="text-blue-500 underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Completa tu cuenta aquí
+                </a>.
+              </p>
+            )}
       </div>
       <div className="mb-4">
         <label className="block text-sm font-bold mb-2">Contraseña</label>

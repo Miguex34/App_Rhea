@@ -50,26 +50,31 @@ const RegistroEmpleado = () => {
 
   const validateForm = () => {
     let formErrors = {};
-    // Validación del nombre: solo letras y espacios
-    if (!/^[a-zA-Z\s]+$/.test(formData.nombre)) {
-      formErrors.nombre = 'El nombre solo debe contener letras y espacios';
+  
+    // Validación del nombre: solo letras, espacios, "ñ" y tildes
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(formData.nombre)) {
+      formErrors.nombre = "El nombre solo debe contener letras, espacios y tildes.";
     }
-
+  
     // Validación de la contraseña: mínimo 6 caracteres y sin espacios
     if (formData.contraseña.length < 6 || /\s/.test(formData.contraseña)) {
-      formErrors.contraseña = 'La contraseña debe tener al menos 6 caracteres y no contener espacios';
+      formErrors.contraseña =
+        "La contraseña debe tener al menos 6 caracteres y no contener espacios.";
     }
-
+  
     // Validación del teléfono: 9 dígitos
     if (!/^\d{9}$/.test(formData.telefono)) {
-      formErrors.telefono = 'El teléfono debe tener exactamente 9 dígitos';
+      formErrors.telefono = "El teléfono debe tener exactamente 9 dígitos.";
     }
-
-    // Validación del cargo: solo letras
-    if (!/^[a-zA-Z]+$/.test(formData.cargo)) {
-      formErrors.cargo = 'El cargo solo debe contener letras';
-    }
-
+  
+    // Validar disponibilidad: si "disponible" es true, ambos horarios deben estar definidos
+    Object.keys(formData.disponibilidad).forEach((day) => {
+      const { disponible, hora_inicio, hora_fin } = formData.disponibilidad[day];
+      if (disponible && (!hora_inicio || !hora_fin)) {
+        formErrors[day] = `Selecciona ambos horarios para el día ${day}.`;
+      }
+    });
+  
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
@@ -94,30 +99,36 @@ const RegistroEmpleado = () => {
         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
           <TimePicker
             value={formData.disponibilidad[day].hora_inicio}
-            onChange={(value) => handleAvailabilityChange(day, 'hora_inicio', value)}
-            ampm={false} // Formato de 24 horas
-            renderInput={(params) => <input {...params} className="block w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none" />}
+            onChange={(value) => handleAvailabilityChange(day, "hora_inicio", value)}
+            ampm={false}
+            renderInput={(params) => (
+              <input {...params} className="block w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none" />
+            )}
             disabled={!formData.disponibilidad[day].disponible}
           />
           <span className="self-center">a</span>
           <TimePicker
             value={formData.disponibilidad[day].hora_fin}
-            onChange={(value) => handleAvailabilityChange(day, 'hora_fin', value)}
-            ampm={false} // Formato de 24 horas
-            renderInput={(params) => <input {...params} className="block w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none" />}
+            onChange={(value) => handleAvailabilityChange(day, "hora_fin", value)}
+            ampm={false}
+            renderInput={(params) => (
+              <input {...params} className="block w-1/3 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none" />
+            )}
             disabled={!formData.disponibilidad[day].disponible}
           />
         </LocalizationProvider>
         <input
           type="checkbox"
           checked={!formData.disponibilidad[day].disponible}
-          onChange={(e) => handleAvailabilityChange(day, 'disponible', !e.target.checked)}
+          onChange={(e) => handleAvailabilityChange(day, "disponible", !e.target.checked)}
           className="ml-4 form-checkbox"
         />
         <span className="ml-2 text-sm text-gray-600">No disponible</span>
       </div>
+      {errors[day] && <p className="text-red-500 text-xs mt-1">{errors[day]}</p>}
     </div>
   );
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
